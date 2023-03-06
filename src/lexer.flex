@@ -112,8 +112,7 @@ L?\"(\\.|[^\\"])*\"     { return(STRING_LITERAL); }
 [ \t\v\n\f]             { /* Ignore formatting escape characters */ }
 .                       { /* Ignore invalid characters */ }
 
-[0-9]+([.][0-9]*)? { yylval.number=strtod(yytext, 0); return T_NUMBER; }
-[a-z]+          { yylval.string=new std::string(yytext); return T_VARIABLE; }
+
 
 %%
 
