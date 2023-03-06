@@ -125,6 +125,7 @@ void yyerror (char const *s)
 
 int check_type() {
 
+ 
   return(IDENTIFIER);
 
   /*
