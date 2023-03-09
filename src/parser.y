@@ -18,12 +18,11 @@
   double number;
   std::string* string;
   Node* node;
-  TranslationUnit* translation_unit;
+  NodeList* node_list;
   Declarator* declarator;
   std::vector<Declarator*> declarator_list;
-  ParameterDeclaration* parameter_declaration;
+  ParameterDeclaration* parameter;
   std::vector<ParameterDeclaration*>* parameter_list;
-  std::vector<Node*>* node_list;
 }
 
 %token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
@@ -60,20 +59,13 @@
 %type <node> additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression
 %type <node> inclusive_or_expression logical_and_expression logical_or_expression conditional_expression assignment_expression
 %type <node> expression constant_expression initializer declaration expression_statement
-
-%type <translation_unit> translation_unit
+%type <node_list> compound_statement statement_list declaration_list translation_unit
 
 %type <declarator> declarator direct_declarator init_declarator
-
 %type <declarator_list> init_declarator_list
 
-%type <parameter_declaration> parameter_declaration
-
+%type <parameter> parameter_declaration
 %type <parameter_list> parameter_list parameter_type_list
-
-%type <node_list> compound_statement statement_list declaration_list
-
-
 
 %start translation_unit
 
@@ -379,14 +371,8 @@ type_qualifier
   ;
 
 declarator
-  : pointer direct_declarator {
-    $$ = $2;
-    $$->pointer = true;
-  }
-  | direct_declarator {
-    $$ = $1;
-    $$->pointer = false;
-  }
+  : pointer direct_declarator { $$ = $2; $$->pointer = true; }
+  | direct_declarator { $$ = $1; $$->pointer = false; }
   ;
 
 direct_declarator
@@ -499,36 +485,20 @@ compound_statement
   | '{' statement_list '}' { $$ = $2; }
   | '{' declaration_list '}' { $$ = $2; }
   | '{' declaration_list statement_list '}' {
-    $$ = new std::vector<Node*>();
-    for (auto e : *$2) {
-      $$->push_back(e);
-    }
-    for (auto e : *$3) {
-      $$->push_back(e);
-    }
+    $$ = new NodeList();
+    $$->add_list($2);
+    $$->add_list($3);
   }
   ;
 
 declaration_list
-  : declaration {
-    $$ = new std::vector<Node*>();
-    $$->push_back($1);
-  }
-  | declaration_list declaration {
-    $$ = $1;
-    $$->push_back($2);
-  }
+  : declaration { $$ = new NodeList($1); }
+  | declaration_list declaration { $$ = $1; $$->add_node($2); }
   ;
 
 statement_list
-  : statement {
-    $$ = new std::vector<Node*>();
-    $$->push_back($1);
-  }
-  | statement_list statement {
-    $$ = $1;
-    $$->push_back($2);
-  }
+  : statement { $$ = new NodeList($1); }
+  | statement_list statement { $$ = $1; $$->add_node($2); }
   ;
 
 expression_statement
@@ -558,11 +528,8 @@ jump_statement
   ;
 
 translation_unit
-  : external_declaration { $$ = new TranslationUnit($1); }
-  | translation_unit external_declaration {
-    $$ = $1;
-    $$->branches.push_back($2);
-  }
+  : external_declaration { $$ = new NodeList($1); }
+  | translation_unit external_declaration { $$ = $1; $$->add_node($2); }
   ;
 
 external_declaration
