@@ -1,20 +1,15 @@
 #pragma once
 
-#include "node.hpp"
+#include "unary_op.hpp"
 
-class Constant : public Node {
+class PostDecExpr : public UnaryOp {
 
 public:
 
-    Constant(int _n)
-        : number(_n) {
-
-    }
+    PostDecExpr(Node* e) : UnaryOp(e) {}
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         // TODO
     }
-
-    int number;
 
 };

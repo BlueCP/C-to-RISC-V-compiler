@@ -11,8 +11,34 @@ public:
 
     }
 
+    Declarator(std::string i, bool p)
+        : identifier(i), pointer(p) {
+
+    }
+
     std::string identifier;
     bool pointer;
+
+};
+
+class InitDeclarator : public Declarator {
+
+public:
+
+    InitDeclarator(std::string i, bool p, Node* e)
+        : Declarator(i, p), expression(e) {
+
+    }
+
+    ~InitDeclarator() {
+        delete expression;
+    }
+
+    void compile(std::ostream& os, int dest_reg, Context& context) const {
+        // TODO: variable initialisation.
+    }
+
+    Node* expression;
 
 };
 

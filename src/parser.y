@@ -20,6 +20,7 @@
   Node* node;
   TranslationUnit* translation_unit;
   Declarator* declarator;
+  std::vector<Declarator*> declarator_list;
   ParameterDeclaration* parameter_declaration;
   std::vector<ParameterDeclaration*>* parameter_list;
   std::vector<Node*>* node_list;
@@ -40,12 +41,11 @@
 
 
 %type <expr> argument_expression_list
-%type <expr> declaration init_declarator_list init_declarator
 %type <expr> struct_or_union_specifier struct_declaration_list struct_declaration specifier_qualifier_list struct_declarator_list
 %type <expr> struct_declarator enum_specifier enumerator_list enumerator pointer type_qualifier_list
 %type <expr> identifier_list type_name abstract_declarator
-%type <expr> direct_abstract_declarator initializer initializer_list labeled_statement
-%type <expr> expression_statement selection_statement iteration_statement
+%type <expr> direct_abstract_declarator initializer_list labeled_statement
+%type <expr> selection_statement iteration_statement
 
 
 
@@ -53,23 +53,25 @@
 
 %type <string> IDENTIFIER STRING_LITERAL unary_operator assignment_operator storage_class_specifier 
 %type <string> struct_or_union type_qualifier
-%type <string> declaration_specifiers type_specifier;
+%type <string> declaration_specifiers type_specifier
 
-%type <node> external_declaration statement jump_statement function_definition;
+%type <node> external_declaration statement jump_statement function_definition
 %type <node> primary_expression postfix_expression unary_expression cast_expression multiplicative_expression
 %type <node> additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression
 %type <node> inclusive_or_expression logical_and_expression logical_or_expression conditional_expression assignment_expression
-%type <node> expression constant_expression
+%type <node> expression constant_expression initializer declaration expression_statement
 
-%type <translation_unit> translation_unit;
+%type <translation_unit> translation_unit
 
-%type <declarator> declarator, direct_declarator;
+%type <declarator> declarator direct_declarator init_declarator
 
-%type <parameter_declaration> parameter_declaration;
+%type <declarator_list> init_declarator_list
 
-%type <parameter_list> parameter_list parameter_type_list;
+%type <parameter_declaration> parameter_declaration
 
-%type <node_list> compound_statement statement_list declaration_list;
+%type <parameter_list> parameter_list parameter_type_list
+
+%type <node_list> compound_statement statement_list declaration_list
 
 
 
@@ -78,21 +80,21 @@
 %%
 
 primary_expression
-  : IDENTIFIER
+  : IDENTIFIER { $$ = new Identifier(*$1); delete $1; }
   | CONSTANT { $$ = new Constant($1); }
   | STRING_LITERAL
-  | '(' expression ')'
+  | '(' expression ')' { $$ = $2; }
   ;
 
 postfix_expression
   : primary_expression { $$ = $1; }
-  | postfix_expression '[' expression ']'
-  | postfix_expression '(' ')'
-  | postfix_expression '(' argument_expression_list ')'
-  | postfix_expression '.' IDENTIFIER
-  | postfix_expression PTR_OP IDENTIFIER
-  | postfix_expression INC_OP
-  | postfix_expression DEC_OP
+  | postfix_expression '[' expression ']' // Array access
+  | postfix_expression '(' ')' // Function call with no args
+  | postfix_expression '(' argument_expression_list ')' // Function call with args
+  | postfix_expression '.' IDENTIFIER // Struct member access
+  | postfix_expression PTR_OP IDENTIFIER // Deference + struct member access
+  | postfix_expression INC_OP { $$ = new PostIncExpr($1); }
+  | postfix_expression DEC_OP { $$ = new PostDecExpr($1); }
   ;
 
 argument_expression_list
@@ -102,22 +104,39 @@ argument_expression_list
 
 unary_expression
   : postfix_expression { $$ = $1; }
-  | INC_OP unary_expression
-  | DEC_OP unary_expression
-  | unary_operator cast_expression
+  | INC_OP unary_expression { $$ = new PreIncExpr($2); }
+  | DEC_OP unary_expression { $$ = new PreDecExpr($2); }
+  | unary_operator cast_expression {
+    if (*unary_operator == '&') {
+      $$ = new BitAndExpr($2);
+    } else if (*unary_operator == '*') {
+      $$ = new DerefExpr($2);
+    } else if (*unary_operator == '+') {
+      $$ = new PlusExpr($2);
+    } else if (*unary_operator == '-') {
+      $$ = new MinusExpr($2);
+    } else if (*unary_operator == '~') {
+      $$ = new BitNotExpr($2);
+    } else if (*unary_operator == '!') {
+      $$ = new NotExpr($2);
+    } else {
+      // Error
+    }
+  }
   | SIZEOF unary_expression
   | SIZEOF '(' type_name ')'
   ;
 
 unary_operator
-  : '&'
-  | '*'
-  | '+'
-  | '-'
-  | '~'
-  | '!'
+  : '&' { $$ = new std::string('&'); }
+  | '*' { $$ = new std::string('*'); }
+  | '+' { $$ = new std::string('+'); }
+  | '-' { $$ = new std::string('-'); }
+  | '~' { $$ = new std::string('~'); }
+  | '!' { $$ = new std::string('!'); }
   ;
 
+// Do not implement casts.
 cast_expression
   : unary_expression { $$ = $1; }
   | '(' type_name ')' cast_expression
@@ -125,74 +144,74 @@ cast_expression
 
 multiplicative_expression
   : cast_expression { $$ = $1; }
-  | multiplicative_expression '*' cast_expression
-  | multiplicative_expression '/' cast_expression
-  | multiplicative_expression '%' cast_expression
+  | multiplicative_expression '*' cast_expression { $$ = new MulExpr($1, $3); }
+  | multiplicative_expression '/' cast_expression { $$ = new DivExpr($1, $3); }
+  | multiplicative_expression '%' cast_expression { $$ = new ModExpr($1, $3); }
   ;
 
 additive_expression
   : multiplicative_expression { $$ = $1; }
-  | additive_expression '+' multiplicative_expression
-  | additive_expression '-' multiplicative_expression
+  | additive_expression '+' multiplicative_expression { $$ = new AddExpr($1 ,$3); }
+  | additive_expression '-' multiplicative_expression { $$ = new SubExpr($1, $3); }
   ;
 
 shift_expression
   : additive_expression { $$ = $1; }
-  | shift_expression LEFT_OP additive_expression
-  | shift_expression RIGHT_OP additive_expression
+  | shift_expression LEFT_OP additive_expression { $$ = new LshiftExpr($1, $3); }
+  | shift_expression RIGHT_OP additive_expression { $$ = new RshiftExpr($1, $3); }
   ;
 
 relational_expression
   : shift_expression { $$ = $1; }
-  | relational_expression '<' shift_expression
-  | relational_expression '>' shift_expression
-  | relational_expression LE_OP shift_expression
-  | relational_expression GE_OP shift_expression
+  | relational_expression '<' shift_expression { $$ = new LtExpr($1, $3); }
+  | relational_expression '>' shift_expression { $$ = new GtExpr($1, $3); }
+  | relational_expression LE_OP shift_expression { $$ = new LeExpr($1, $3); }
+  | relational_expression GE_OP shift_expression { $$ = new GeExpr($1, $3); }
   ;
 
 equality_expression
   : relational_expression { $$ = $1; }
-  | equality_expression EQ_OP relational_expression
-  | equality_expression NE_OP relational_expression
+  | equality_expression EQ_OP relational_expression { $$ = new EqExpr($1, $3); }
+  | equality_expression NE_OP relational_expression { $$ = new NeExpr($1, $3); }
   ;
 
 and_expression
   : equality_expression { $$ = $1; }
-  | and_expression '&' equality_expression
+  | and_expression '&' equality_expression { $$ = new AndExpr($1, $3); }
   ;
 
 exclusive_or_expression
   : and_expression { $$ = $1; }
-  | exclusive_or_expression '^' and_expression
+  | exclusive_or_expression '^' and_expression { $$ = new ExclOrExp($1, $3); }
   ;
 
 inclusive_or_expression
   : exclusive_or_expression { $$ = $1; }
-  | inclusive_or_expression '|' exclusive_or_expression
+  | inclusive_or_expression '|' exclusive_or_expression { $$ = new InclOrExpr($1, $3); }
   ;
 
 logical_and_expression
   : inclusive_or_expression { $$ = $1; }
-  | logical_and_expression AND_OP inclusive_or_expression
+  | logical_and_expression AND_OP inclusive_or_expression { $$ = new LogicalAndExpression($1, $3); }
   ;
 
 logical_or_expression
   : logical_and_expression { $$ = $1; }
-  | logical_or_expression OR_OP logical_and_expression
+  | logical_or_expression OR_OP logical_and_expression { $$ = new LogicalOrExpression($1, $3); }
   ;
 
 conditional_expression
   : logical_or_expression { $$ = $1; }
-  | logical_or_expression '?' expression ':' conditional_expression
+  | logical_or_expression '?' expression ':' conditional_expression { $$ = new TernaryOperator($1, $3, $5); }
   ;
 
 assignment_expression
   : conditional_expression { $$ = $1; }
-  | unary_expression assignment_operator assignment_expression
+  | unary_expression assignment_operator assignment_expression { $$ = new AssignmentExpression($1, *$2, $3); delete $2; }
   ;
 
 assignment_operator
-  : '='
+  : '=' { $$ = new std::string("="); }
   | MUL_ASSIGN
   | DIV_ASSIGN
   | MOD_ASSIGN
@@ -207,38 +226,47 @@ assignment_operator
 
 expression
   : assignment_expression { $$ = $1; }
-  | expression ',' assignment_expression
+  | expression ',' assignment_expression // Do not implement sequence points.
   ;
 
 constant_expression
   : conditional_expression
   ;
 
+// Assume this refers to a variable declaration for now
+// (add function declarations later).
 declaration
   : declaration_specifiers ';'
-  | declaration_specifiers init_declarator_list ';'
+  | declaration_specifiers init_declarator_list ';' { $$ = new Declaration(*$1, *$2); delete $1; delete $2; }
   ;
 
+// For now, assume that a declaration specifier can only contain one type.
 declaration_specifiers
   : storage_class_specifier
   | storage_class_specifier declaration_specifiers
-  | type_specifier { $$ = $1; // Assume that a declaration specifier can only contain one type.
-  }
+  | type_specifier { $$ = $1; }
   | type_specifier declaration_specifiers
   | type_qualifier
   | type_qualifier declaration_specifiers
   ;
 
 init_declarator_list
-  : init_declarator
-  | init_declarator_list ',' init_declarator
+  : init_declarator {
+    $$ = new std::vector<Declarator*>();
+    $$->push_back($1);
+  }
+  | init_declarator_list ',' init_declarator {
+    $$ = $1;
+    $$->push_back($3);
+  }
   ;
 
 init_declarator
-  : declarator
-  | declarator '=' initializer
+  : declarator { $$ = $1; }
+  | declarator '=' initializer { $$ = new InitDeclarator($1->identifier, $1->pointer, $3); }
   ;
 
+// Implement typedef later.
 storage_class_specifier
   : TYPEDEF
   | EXTERN
@@ -270,7 +298,7 @@ struct_or_union_specifier
 
 struct_or_union
   : STRUCT
-  | UNION
+  | UNION // Do not implement unions.
   ;
 
 struct_declaration_list
@@ -316,6 +344,7 @@ enumerator
   | IDENTIFIER '=' constant_expression
   ;
 
+// Do not implement either of these keywords.
 type_qualifier
   : CONST
   | VOLATILE
@@ -335,7 +364,7 @@ declarator
 direct_declarator
   : IDENTIFIER { $$ = new Declarator(*$1); delete $1; }
   | '(' declarator ')'
-  | direct_declarator '[' constant_expression ']'
+  | direct_declarator '[' constant_expression ']' // Array definition (with number of elements).
   | direct_declarator '[' ']'
   | direct_declarator '(' parameter_type_list ')' { $$ = new FunctionDeclarator($1->identifier, *$3); delete $3; }
   | direct_declarator '(' identifier_list ')'
@@ -406,7 +435,7 @@ direct_abstract_declarator
   ;
 
 initializer
-  : assignment_expression
+  : assignment_expression { $$ = $1; }
   | '{' initializer_list '}'
   | '{' initializer_list ',' '}'
   ;
@@ -464,7 +493,7 @@ statement_list
 
 expression_statement
   : ';'
-  | expression ';'
+  | expression ';' { $$ = $1; }
   ;
 
 selection_statement
