@@ -19,7 +19,6 @@
   std::string* string;
   Node* node;
   TranslationUnit* translation_unit;
-  FunctionDef* function_def;
   Declarator* declarator;
   ParameterDeclaration* parameter_declaration;
   std::vector<ParameterDeclaration*>* parameter_list;
@@ -56,15 +55,13 @@
 %type <string> struct_or_union type_qualifier
 %type <string> declaration_specifiers type_specifier;
 
-%type <node> external_declaration statement jump_statement;
+%type <node> external_declaration statement jump_statement function_definition;
 %type <node> primary_expression postfix_expression unary_expression cast_expression multiplicative_expression
 %type <node> additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression
 %type <node> inclusive_or_expression logical_and_expression logical_or_expression conditional_expression assignment_expression
 %type <node> expression constant_expression
 
 %type <translation_unit> translation_unit;
-
-%type <function_def> function_definition;
 
 %type <declarator> declarator, direct_declarator;
 
@@ -225,8 +222,7 @@ declaration
 declaration_specifiers
   : storage_class_specifier
   | storage_class_specifier declaration_specifiers
-  | type_specifier {
-    $$ = $1; // Assume that a declaration specifier can only contain one type.
+  | type_specifier { $$ = $1; // Assume that a declaration specifier can only contain one type.
   }
   | type_specifier declaration_specifiers
   | type_qualifier
@@ -337,13 +333,13 @@ declarator
   ;
 
 direct_declarator
-  : IDENTIFIER { $$ = new Declarator($1); }
+  : IDENTIFIER { $$ = new Declarator(*$1); delete $1; }
   | '(' declarator ')'
   | direct_declarator '[' constant_expression ']'
   | direct_declarator '[' ']'
-  | direct_declarator '(' parameter_type_list ')' { $$ = new FunctionDeclarator($1->identifier, $2); }
+  | direct_declarator '(' parameter_type_list ')' { $$ = new FunctionDeclarator($1->identifier, *$3); delete $3; }
   | direct_declarator '(' identifier_list ')'
-  | direct_declarator '(' ')' { $$ = new FunctionDeclarator($1->identifier, new std::vector<ParameterDeclaration*>); }
+  | direct_declarator '(' ')' { $$ = new FunctionDeclarator($1->identifier); }
   ;
 
 pointer
@@ -371,12 +367,12 @@ parameter_list
   }
   | parameter_list ',' parameter_declaration {
     $$ = $1;
-    $$->push_back($2);
+    $$->push_back($3);
   }
   ;
 
 parameter_declaration
-  : declaration_specifiers declarator { $$ = new ParameterDeclaration($1, $2); }
+  : declaration_specifiers declarator { $$ = new ParameterDeclaration(*$1, $2); delete $1; }
   | declaration_specifiers abstract_declarator
   | declaration_specifiers
   ;
@@ -437,14 +433,14 @@ labeled_statement
 
 compound_statement
   : '{' '}'
-  | '{' statement_list '}' { $$ = $1; }
-  | '{' declaration_list '}' { $$ = $1; }
+  | '{' statement_list '}' { $$ = $2; }
+  | '{' declaration_list '}' { $$ = $2; }
   | '{' declaration_list statement_list '}' {
     $$ = new std::vector<Node*>();
-    for (auto e : *$1) {
+    for (auto e : *$2) {
       $$->push_back(e);
     }
-    for (auto e : *$2) {
+    for (auto e : *$3) {
       $$->push_back(e);
     }
   }
@@ -507,7 +503,7 @@ external_declaration
 
 function_definition
   : declaration_specifiers declarator declaration_list compound_statement
-  | declaration_specifiers declarator compound_statement { $$ = new FunctionDef($1, $2, $3); }
+  | declaration_specifiers declarator compound_statement { $$ = new FunctionDef(*$1, $2, *$3); delete $1; delete $3; }
   | declarator declaration_list compound_statement
   | declarator compound_statement
   ;
