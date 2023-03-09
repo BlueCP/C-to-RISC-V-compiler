@@ -19,8 +19,6 @@ public:
         // TODO
     }
 
-private:
-
     Node* expression;
 
 };

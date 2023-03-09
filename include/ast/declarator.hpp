@@ -53,8 +53,6 @@ public:
         delete declarator;
     }
 
-private:
-
     std::string* type;
     Declarator* declarator;
 
