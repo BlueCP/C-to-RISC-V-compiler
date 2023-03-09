@@ -107,21 +107,22 @@ unary_expression
   | INC_OP unary_expression { $$ = new PreIncExpr($2); }
   | DEC_OP unary_expression { $$ = new PreDecExpr($2); }
   | unary_operator cast_expression {
-    if (*unary_operator == '&') {
+    if (*$1 == '&') {
       $$ = new BitAndExpr($2);
-    } else if (*unary_operator == '*') {
+    } else if (*$1 == '*') {
       $$ = new DerefExpr($2);
-    } else if (*unary_operator == '+') {
+    } else if (*$1 == '+') {
       $$ = new PlusExpr($2);
-    } else if (*unary_operator == '-') {
+    } else if (*$1 == '-') {
       $$ = new MinusExpr($2);
-    } else if (*unary_operator == '~') {
+    } else if (*$1 == '~') {
       $$ = new BitNotExpr($2);
-    } else if (*unary_operator == '!') {
+    } else if (*$1 == '!') {
       $$ = new NotExpr($2);
     } else {
       // Error
     }
+    delete $1;
   }
   | SIZEOF unary_expression
   | SIZEOF '(' type_name ')'
@@ -207,7 +208,34 @@ conditional_expression
 
 assignment_expression
   : conditional_expression { $$ = $1; }
-  | unary_expression assignment_operator assignment_expression { $$ = new AssignmentExpression($1, *$2, $3); delete $2; }
+  | unary_expression assignment_operator assignment_expression {
+    if (*$2 == '=') {
+      $$ = new AssignmentExpr($1, $3);
+    } else if (*$2 == '*=') {
+      $$ = new AssignmentExpr($1, new MulExpr($1, $3));
+    } else if (*$2 == '/=') {
+      $$ = new AssignmentExpr($1, new DivExpr($1, $3));
+    } else if (*$2 == '%=') {
+      $$ = new AssignmentExpr($1, new ModExpr($1, $3));
+    } else if (*$2 == '+=') {
+      $$ = new AssignmentExpr($1, new AddExpr($1, $3));
+    } else if (*$2 == '-=') {
+      $$ = new AssignmentExpr($1, new SubExpr($1, $3));
+    } else if (*$2 == '<<=') {
+      $$ = new AssignmentExpr($1, new LshiftExpr($1, $3));
+    } else if (*$2 == '>>=') {
+      $$ = new AssignmentExpr($1, new RshiftExpr($1, $3));
+    } else if (*$2 == '&=') {
+      $$ = new AssignmentExpr($1, new BitAndExpr($1, $3));
+    } else if (*$2 == '^=') {
+      $$ = new AssignmentExpr($1, new ExclOrExpr($1, $3));
+    } else if (*$2 == '|=') {
+      $$ = new AssignmentExpr($1, new InclOrExpr($1, $3));
+    } else {
+      // Error
+    }
+    delete $2;
+  }
   ;
 
 assignment_operator
@@ -230,7 +258,7 @@ expression
   ;
 
 constant_expression
-  : conditional_expression
+  : conditional_expression { $$ = $1; }
   ;
 
 // Assume this refers to a variable declaration for now
@@ -391,7 +419,7 @@ parameter_type_list
 
 parameter_list
   : parameter_declaration {
-    $$ = new std::vector<ParameterDeclaration*>;
+    $$ = new std::vector<ParameterDeclaration*>();
     $$->push_back($1);
   }
   | parameter_list ',' parameter_declaration {
@@ -407,8 +435,14 @@ parameter_declaration
   ;
 
 identifier_list
-  : IDENTIFIER
-  | identifier_list ',' IDENTIFIER
+  : IDENTIFIER {
+    $$ = new std::vector<std::string*>();
+    $$->push_back($1);
+  }
+  | identifier_list ',' IDENTIFIER {
+    $$ = $1;
+    $$->push_back($3);
+  }
   ;
 
 type_name
@@ -476,8 +510,14 @@ compound_statement
   ;
 
 declaration_list
-  : declaration
-  | declaration_list declaration
+  : declaration {
+    $$ = new std::vector<Node*>();
+    $$->push_back($1);
+  }
+  | declaration_list declaration {
+    $$ = $1;
+    $$->push_back($2);
+  }
   ;
 
 statement_list
@@ -497,23 +537,23 @@ expression_statement
   ;
 
 selection_statement
-  : IF '(' expression ')' statement
-  | IF '(' expression ')' statement ELSE statement
+  : IF '(' expression ')' statement { $$ = new IfStatement($3, $5); }
+  | IF '(' expression ')' statement ELSE statement { $$ = new IfElseStatement($3, $5, $7); }
   | SWITCH '(' expression ')' statement
   ;
 
 iteration_statement
-  : WHILE '(' expression ')' statement
-  | DO statement WHILE '(' expression ')' ';'
-  | FOR '(' expression_statement expression_statement ')' statement
-  | FOR '(' expression_statement expression_statement expression ')' statement
+  : WHILE '(' expression ')' statement { $$ = new WhileStatement($3, $5); }
+  | DO statement WHILE '(' expression ')' ';' { $$ = new DoWhileStatement($2, $5); }
+  | FOR '(' expression_statement expression_statement ')' statement { $$ = new ForStatement($3, $4, $6); }
+  | FOR '(' expression_statement expression_statement expression ')' statement { $$ = new ForStatement($3, $4, $5, $7); }
   ;
 
 jump_statement
   : GOTO IDENTIFIER ';'
   | CONTINUE ';'
   | BREAK ';'
-  | RETURN ';'
+  | RETURN ';' { $$ = new ReturnStatement(); }
   | RETURN expression ';' { $$ = new ReturnStatement($2); }
   ;
 
