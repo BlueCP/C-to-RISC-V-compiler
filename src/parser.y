@@ -3,7 +3,7 @@
 
   #include <cassert>
 
-  extern const Expression *g_root; // A way of getting the AST out
+  extern Node *g_root; // A way of getting the AST out
 
   //! This is to fix problems when generating C++
   // We are declaring the functions provided by Flex, so
@@ -15,10 +15,15 @@
 // Represents the value associated with any kind of
 // AST node.
 %union{
-  const Expression *expr;
   double number;
-  std::string *string;
-  std::vector<std::string> *list;
+  std::string* string;
+  Node* node;
+  TranslationUnit* translation_unit;
+  FunctionDef* function_def;
+  Declarator* declarator;
+  ParameterDeclaration* parameter_declaration;
+  std::vector<ParameterDeclaration*>* parameter_list;
+  std::vector<Node*>* node_list;
 }
 
 %token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
@@ -33,23 +38,43 @@
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
-%type <expr> primary_expression postfix_expression argument_expression_list unary_expression cast_expression multiplicative_expression
-%type <expr> additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression
-%type <expr> inclusive_or_expression logical_and_expression logical_or_expression conditional_expression assignment_expression
-%type <expr> expression constant_expression declaration init_declarator_list init_declarator
+
+
+%type <expr> argument_expression_list
+%type <expr> declaration init_declarator_list init_declarator
 %type <expr> struct_or_union_specifier struct_declaration_list struct_declaration specifier_qualifier_list struct_declarator_list
-%type <expr> struct_declarator enum_specifier enumerator_list enumerator declarator direct_declarator pointer type_qualifier_list
-%type <expr> parameter_type_list parameter_list parameter_declaration identifier_list type_name abstract_declarator
-%type <expr> direct_abstract_declarator initializer initializer_list statement labeled_statement compound_statement declaration_list
-%type <expr> statement_list expression_statement selection_statement iteration_statement jump_statement translation_unit
-%type <expr> external_declaration function_definition
+%type <expr> struct_declarator enum_specifier enumerator_list enumerator pointer type_qualifier_list
+%type <expr> identifier_list type_name abstract_declarator
+%type <expr> direct_abstract_declarator initializer initializer_list labeled_statement
+%type <expr> expression_statement selection_statement iteration_statement
+
+
 
 %type <number> CONSTANT
 
-%type <string> IDENTIFIER STRING_LITERAL unary_operator assignment_operator storage_class_specifier type_specifier
+%type <string> IDENTIFIER STRING_LITERAL unary_operator assignment_operator storage_class_specifier 
 %type <string> struct_or_union type_qualifier
+%type <string> declaration_specifiers type_specifier;
 
-%type <list> declaration_specifiers
+%type <node> external_declaration statement jump_statement;
+%type <node> primary_expression postfix_expression unary_expression cast_expression multiplicative_expression
+%type <node> additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression
+%type <node> inclusive_or_expression logical_and_expression logical_or_expression conditional_expression assignment_expression
+%type <node> expression constant_expression
+
+%type <translation_unit> translation_unit;
+
+%type <function_def> function_definition;
+
+%type <declarator> declarator, direct_declarator;
+
+%type <parameter_declaration> parameter_declaration;
+
+%type <parameter_list> parameter_list parameter_type_list;
+
+%type <node_list> compound_statement statement_list declaration_list;
+
+
 
 %start translation_unit
 
@@ -57,13 +82,13 @@
 
 primary_expression
   : IDENTIFIER
-  | CONSTANT
+  | CONSTANT { $$ = new Constant($1); }
   | STRING_LITERAL
   | '(' expression ')'
   ;
 
 postfix_expression
-  : primary_expression
+  : primary_expression { $$ = $1; }
   | postfix_expression '[' expression ']'
   | postfix_expression '(' ')'
   | postfix_expression '(' argument_expression_list ')'
@@ -79,7 +104,7 @@ argument_expression_list
   ;
 
 unary_expression
-  : postfix_expression
+  : postfix_expression { $$ = $1; }
   | INC_OP unary_expression
   | DEC_OP unary_expression
   | unary_operator cast_expression
@@ -97,31 +122,31 @@ unary_operator
   ;
 
 cast_expression
-  : unary_expression
+  : unary_expression { $$ = $1; }
   | '(' type_name ')' cast_expression
   ;
 
 multiplicative_expression
-  : cast_expression
+  : cast_expression { $$ = $1; }
   | multiplicative_expression '*' cast_expression
   | multiplicative_expression '/' cast_expression
   | multiplicative_expression '%' cast_expression
   ;
 
 additive_expression
-  : multiplicative_expression
+  : multiplicative_expression { $$ = $1; }
   | additive_expression '+' multiplicative_expression
   | additive_expression '-' multiplicative_expression
   ;
 
 shift_expression
-  : additive_expression
+  : additive_expression { $$ = $1; }
   | shift_expression LEFT_OP additive_expression
   | shift_expression RIGHT_OP additive_expression
   ;
 
 relational_expression
-  : shift_expression
+  : shift_expression { $$ = $1; }
   | relational_expression '<' shift_expression
   | relational_expression '>' shift_expression
   | relational_expression LE_OP shift_expression
@@ -129,43 +154,43 @@ relational_expression
   ;
 
 equality_expression
-  : relational_expression
+  : relational_expression { $$ = $1; }
   | equality_expression EQ_OP relational_expression
   | equality_expression NE_OP relational_expression
   ;
 
 and_expression
-  : equality_expression
+  : equality_expression { $$ = $1; }
   | and_expression '&' equality_expression
   ;
 
 exclusive_or_expression
-  : and_expression
+  : and_expression { $$ = $1; }
   | exclusive_or_expression '^' and_expression
   ;
 
 inclusive_or_expression
-  : exclusive_or_expression
+  : exclusive_or_expression { $$ = $1; }
   | inclusive_or_expression '|' exclusive_or_expression
   ;
 
 logical_and_expression
-  : inclusive_or_expression
+  : inclusive_or_expression { $$ = $1; }
   | logical_and_expression AND_OP inclusive_or_expression
   ;
 
 logical_or_expression
-  : logical_and_expression
+  : logical_and_expression { $$ = $1; }
   | logical_or_expression OR_OP logical_and_expression
   ;
 
 conditional_expression
-  : logical_or_expression
+  : logical_or_expression { $$ = $1; }
   | logical_or_expression '?' expression ':' conditional_expression
   ;
 
 assignment_expression
-  : conditional_expression
+  : conditional_expression { $$ = $1; }
   | unary_expression assignment_operator assignment_expression
   ;
 
@@ -184,7 +209,7 @@ assignment_operator
   ;
 
 expression
-  : assignment_expression
+  : assignment_expression { $$ = $1; }
   | expression ',' assignment_expression
   ;
 
@@ -200,7 +225,9 @@ declaration
 declaration_specifiers
   : storage_class_specifier
   | storage_class_specifier declaration_specifiers
-  | type_specifier { $$ = new std::vector<std::string>; $$->push_back($1); }
+  | type_specifier {
+    $$ = $1; // Assume that a declaration specifier can only contain one type.
+  }
   | type_specifier declaration_specifiers
   | type_qualifier
   | type_qualifier declaration_specifiers
@@ -299,18 +326,24 @@ type_qualifier
   ;
 
 declarator
-  : pointer direct_declarator
-  | direct_declarator
+  : pointer direct_declarator {
+    $$ = $2;
+    $$->pointer = true;
+  }
+  | direct_declarator {
+    $$ = $1;
+    $$->pointer = false;
+  }
   ;
 
 direct_declarator
-  : IDENTIFIER
+  : IDENTIFIER { $$ = new Declarator($1); }
   | '(' declarator ')'
   | direct_declarator '[' constant_expression ']'
   | direct_declarator '[' ']'
-  | direct_declarator '(' parameter_type_list ')'
+  | direct_declarator '(' parameter_type_list ')' { $$ = new FunctionDeclarator($1->identifier, $2); }
   | direct_declarator '(' identifier_list ')'
-  | direct_declarator '(' ')'
+  | direct_declarator '(' ')' { $$ = new FunctionDeclarator($1->identifier, new std::vector<ParameterDeclaration*>); }
   ;
 
 pointer
@@ -327,17 +360,23 @@ type_qualifier_list
 
 
 parameter_type_list
-  : parameter_list
+  : parameter_list { $$ = $1; }
   | parameter_list ',' ELLIPSIS
   ;
 
 parameter_list
-  : parameter_declaration
-  | parameter_list ',' parameter_declaration
+  : parameter_declaration {
+    $$ = new std::vector<ParameterDeclaration*>;
+    $$->push_back($1);
+  }
+  | parameter_list ',' parameter_declaration {
+    $$ = $1;
+    $$->push_back($2);
+  }
   ;
 
 parameter_declaration
-  : declaration_specifiers declarator
+  : declaration_specifiers declarator { $$ = new ParameterDeclaration($1, $2); }
   | declaration_specifiers abstract_declarator
   | declaration_specifiers
   ;
@@ -382,12 +421,12 @@ initializer_list
   ;
 
 statement
-  : labeled_statement
-  | compound_statement
-  | expression_statement
-  | selection_statement
-  | iteration_statement
-  | jump_statement
+  : labeled_statement { $$ = $1; }
+  | compound_statement { $$ = $1; }
+  | expression_statement { $$ = $1; }
+  | selection_statement { $$ = $1; }
+  | iteration_statement { $$ = $1; }
+  | jump_statement { $$ = $1; }
   ;
 
 labeled_statement
@@ -398,9 +437,17 @@ labeled_statement
 
 compound_statement
   : '{' '}'
-  | '{' statement_list '}'
-  | '{' declaration_list '}'
-  | '{' declaration_list statement_list '}'
+  | '{' statement_list '}' { $$ = $1; }
+  | '{' declaration_list '}' { $$ = $1; }
+  | '{' declaration_list statement_list '}' {
+    $$ = new std::vector<Node*>();
+    for (auto e : *$1) {
+      $$->push_back(e);
+    }
+    for (auto e : *$2) {
+      $$->push_back(e);
+    }
+  }
   ;
 
 declaration_list
@@ -409,8 +456,14 @@ declaration_list
   ;
 
 statement_list
-  : statement
-  | statement_list statement
+  : statement {
+    $$ = new std::vector<Node*>();
+    $$->push_back($1);
+  }
+  | statement_list statement {
+    $$ = $1;
+    $$->push_back($2);
+  }
   ;
 
 expression_statement
@@ -436,31 +489,34 @@ jump_statement
   | CONTINUE ';'
   | BREAK ';'
   | RETURN ';'
-  | RETURN expression ';'
+  | RETURN expression ';' { $$ = new ReturnStatement($2); }
   ;
 
 translation_unit
-  : external_declaration
-  | translation_unit external_declaration
+  : external_declaration { $$ = new TranslationUnit($1); }
+  | translation_unit external_declaration {
+    $$ = $1;
+    $$->branches.push_back($2);
+  }
   ;
 
 external_declaration
-  : function_definition
-  | declaration
+  : function_definition { $$ = $1; }
+  | declaration { $$ = $1; }
   ;
 
 function_definition
   : declaration_specifiers declarator declaration_list compound_statement
-  | declaration_specifiers declarator compound_statement
+  | declaration_specifiers declarator compound_statement { $$ = new FunctionDef($1, $2, $3); }
   | declarator declaration_list compound_statement
   | declarator compound_statement
   ;
 
 %%
 
-const Expression *g_root; // Definition of variable (to match declaration earlier)
+Node *g_root; // Definition of variable (to match declaration earlier)
 
-const Expression *parseAST()
+Node *parseAST()
 {
   g_root=0;
   yyparse();

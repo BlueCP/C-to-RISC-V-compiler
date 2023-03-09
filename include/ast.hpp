@@ -1,10 +1,11 @@
-#ifndef ast_hpp
-#define ast_hpp
+#pragma once
 
-#include "ast/ast_expression.hpp"
-#include "ast/ast_function.hpp"
+#include "ast/context.hpp"
+#include "ast/declarator.hpp"
+#include "ast/function_def.hpp"
+#include "ast/node.hpp"
+#include "ast/primitives.hpp"
+#include "ast/return_statement.hpp"
+#include "ast/translation_unit.hpp"
 
-
-extern const Expression *parseAST();
-
-#endif
+extern Node *parseAST();
