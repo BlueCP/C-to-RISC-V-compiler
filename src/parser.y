@@ -539,7 +539,7 @@ external_declaration
 
 function_definition
   : declaration_specifiers declarator declaration_list compound_statement
-  | declaration_specifiers declarator compound_statement { $$ = new FunctionDef(*$1, $2, *$3); delete $1; delete $3; }
+  | declaration_specifiers declarator compound_statement { $$ = new FunctionDef(*$1, $2, $3); delete $1; }
   | declarator declaration_list compound_statement
   | declarator compound_statement
   ;
