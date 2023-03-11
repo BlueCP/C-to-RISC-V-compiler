@@ -18,7 +18,7 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         if (expression != nullptr) {
-            expression->compile(os, 10, context); // Into return value register
+            expression->compile(os, dest_reg, context);
         }
         context.return_flag = true;
     }

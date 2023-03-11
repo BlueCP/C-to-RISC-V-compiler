@@ -22,7 +22,7 @@ public:
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO
+        // TODO codegen
         // Note that if update_statement is a nullptr, then no update statement was provided.
     }
 

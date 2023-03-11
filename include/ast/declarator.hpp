@@ -25,8 +25,8 @@ public:
         delete expression;
     }
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO
+    void compile(std::ostream& os, int dest_reg, Context& context) {
+        expression->compile(os, dest_reg, context);
     }
 
     Node* expression;
@@ -50,9 +50,9 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         if (context.function_declarator_start) {
-            // TODO function definition header.
+            // TODO codegen function definition header.
         } else {
-            // TODO function definition footer.
+            // TODO codegen function definition footer.
         }
     }
 

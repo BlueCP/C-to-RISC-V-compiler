@@ -9,7 +9,7 @@ public:
     Constant(int _n) : number(_n) {}
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO put number in dest_reg.
+        // TODO codegen put number in dest_reg.
     }
 
     int number;
@@ -24,7 +24,8 @@ public:
     Identifier(std::string s) : identifier(s) {}
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO put number corresponding to variable corresponding to identifier in dest_reg.
+        int fp_offset = context.find_fp_offset(identifier);
+        context.load_reg(os, dest_reg, fp_offset);
 
         // Note that Identifier is used as part of more complex expressions, such as
         // array accesses and funciton calls. However, that implementation is left to those

@@ -9,7 +9,7 @@ public:
     NotExpr(Node* e) : UnaryOp(e) {}
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO
+        expr->compile(os, dest_reg, context);
     }
 
 };

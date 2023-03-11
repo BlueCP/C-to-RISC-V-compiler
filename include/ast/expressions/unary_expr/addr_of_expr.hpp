@@ -2,11 +2,11 @@
 
 #include "unary_op.hpp"
 
-class BitAndExpr : public UnaryOp {
+class AddrOfExpr : public UnaryOp {
 
 public:
 
-    BitAndExpr(Node* e) : UnaryOp(e) {}
+    AddrOfExpr(Node* e) : UnaryOp(e) {}
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         // TODO

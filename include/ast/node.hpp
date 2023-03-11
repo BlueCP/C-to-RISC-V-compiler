@@ -16,6 +16,11 @@ static std::string reg_name[32] = {
     "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
 
+struct RegPair {
+    int reg1;
+    int reg2;
+};
+
 class Node {
 public:
     virtual void compile(std::ostream& os, int dest_reg, Context& context) const = 0;

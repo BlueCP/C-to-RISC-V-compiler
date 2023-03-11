@@ -1,25 +1,15 @@
 #pragma once
 
 #include "../node.hpp"
+#include "../statements/selection_statements/if_else_statement.hpp"
 
-class TernaryOp : public Node {
+// As far as I can see, a ternary statement is essentially the same as an
+// if-else statement in the view of codegen.
+
+class TernaryOp : public IfElseStatement {
 
 public:
 
-    TernaryOp(Node* c, Node* e1, Node* e2) : condition(c), expr1(e1), expr2(e2) {}
-
-    ~TernaryOp() {
-        delete condition;
-        delete expr1;
-        delete expr2;
-    }
-
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO
-    }
-
-    Node* condition;
-    Node* expr1;
-    Node* expr2;
+    TernaryOp(Node* c, Node* i, Node* e) : IfElseStatement(c, i, e) {}
 
 };

@@ -56,8 +56,14 @@ public:
     }
 
     // Creates a new variable in the current stack frame.
-    void new_variable(std::string type, bool is_pointer, std::string identifier) {
-        scope_stack.back()->new_variable(type, is_pointer, identifier);
+    // Returns the fp offset.
+    int new_variable(std::string type, std::string identifier) {
+        return scope_stack.back()->new_variable(type, identifier);
+    }
+
+    // Stores a register in the stack using the given fp offset.
+    void store_reg(std::ostream& os, int reg, int fp_offset) {
+        // TODO codegen
     }
 
     // Returns the fp offset of a variable relative to the current fp.
@@ -78,6 +84,11 @@ public:
             // Since fp_offset is relevant to the variable's own stack frame, not the current one,
             // we have to readjust it by using how many frames deep we have to go.
         }
+    }
+
+    // Loads a register from the stack using the given fp offset.
+    void load_reg(std::ostream& os, int reg, int fp_offset) {
+        // TODO codegen
     }
 
     std::vector<Scope*> scope_stack;
@@ -104,9 +115,11 @@ public:
         }
     }
 
-    void new_variable(std::string type, bool is_pointer, std::string identifier) {
-        variables.push_back(new VarInfo(type, is_pointer, identifier, fp_offset_tracker - 4));
+    // Add a new variable to the stack frame and return the fp offset.
+    int new_variable(std::string type, std::string identifier) {
+        variables.push_back(new VarInfo(type, identifier, fp_offset_tracker - 4));
         fp_offset_tracker -= 4;
+        return fp_offset_tracker;
         // If the fp_offset_tracker exceeds the stack frame size, the program will have undefined behaviour.
     }
 
@@ -130,11 +143,10 @@ class VarInfo {
 
 public:
 
-    VarInfo(std::string t, bool p, std::string i, int f)
-        : type(t), is_pointer(p), identifier(i), fp_offset(f) {}
+    VarInfo(std::string t, std::string i, int f)
+        : type(t), identifier(i), fp_offset(f) {}
 
     std::string type;
-    bool is_pointer;
     std::string identifier;
     int fp_offset; // Frame pointer offset
 

@@ -109,7 +109,7 @@ unary_expression
   | DEC_OP unary_expression { $$ = new PreDecExpr($2); }
   | unary_operator cast_expression {
     if (*$1 == '&') {
-      $$ = new BitAndExpr($2);
+      $$ = new AddrOfExpr($2);
     } else if (*$1 == '*') {
       $$ = new DerefExpr($2);
     } else if (*$1 == '+') {
@@ -211,27 +211,27 @@ assignment_expression
   : conditional_expression { $$ = $1; }
   | unary_expression assignment_operator assignment_expression {
     // Expand assignments like x += 5 into x = x + 5.
-    if (*$2 == '=') {
+    if (*$2 == "=") {
       $$ = new AssignmentExpr($1, $3);
-    } else if (*$2 == '*=') {
+    } else if (*$2 == "*=") {
       $$ = new AssignmentExpr($1, new MulExpr($1, $3));
-    } else if (*$2 == '/=') {
+    } else if (*$2 == "/=") {
       $$ = new AssignmentExpr($1, new DivExpr($1, $3));
-    } else if (*$2 == '%=') {
+    } else if (*$2 == "%=") {
       $$ = new AssignmentExpr($1, new ModExpr($1, $3));
-    } else if (*$2 == '+=') {
+    } else if (*$2 == "+=") {
       $$ = new AssignmentExpr($1, new AddExpr($1, $3));
-    } else if (*$2 == '-=') {
+    } else if (*$2 == "-=") {
       $$ = new AssignmentExpr($1, new SubExpr($1, $3));
-    } else if (*$2 == '<<=') {
+    } else if (*$2 == "<<=") {
       $$ = new AssignmentExpr($1, new LshiftExpr($1, $3));
-    } else if (*$2 == '>>=') {
+    } else if (*$2 == ">>=") {
       $$ = new AssignmentExpr($1, new RshiftExpr($1, $3));
-    } else if (*$2 == '&=') {
+    } else if (*$2 == "&=") {
       $$ = new AssignmentExpr($1, new BitAndExpr($1, $3));
-    } else if (*$2 == '^=') {
+    } else if (*$2 == "^=") {
       $$ = new AssignmentExpr($1, new ExclOrExpr($1, $3));
-    } else if (*$2 == '|=') {
+    } else if (*$2 == "|=") {
       $$ = new AssignmentExpr($1, new InclOrExpr($1, $3));
     } else {
       // Error
@@ -292,7 +292,8 @@ init_declarator_list
   ;
 
 init_declarator
-  : declarator { $$ = $1; }
+  : declarator { $$ = new InitDeclarator($1->identifier, $1->pointer, new Constant(0)); }
+  // By default, initialise all variables to zero.
   | declarator '=' initializer { $$ = new InitDeclarator($1->identifier, $1->pointer, $3); }
   ;
 
