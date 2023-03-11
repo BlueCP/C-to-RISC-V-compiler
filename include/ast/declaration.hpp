@@ -18,9 +18,9 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         for (auto d : declarators) {
-            d->compile(os, dest_reg, context);
-            int fp_offset = context.new_variable(type, d->identifier);
-            // TODO codegen use fp_offset to store dest_reg in stack.
+            d->compile(os, dest_reg, context); // Compute intialiser value and store result in dest_reg
+            int fp_offset = context.new_variable(type, d->identifier); // Prepare to add new variable to stack
+            context.store_reg(os, dest_reg, fp_offset); // Store variable in stack
         }
         // Update this to work with more types (other than int) later.
     }

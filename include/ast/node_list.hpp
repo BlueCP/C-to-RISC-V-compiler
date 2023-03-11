@@ -48,6 +48,7 @@ public:
         for (auto node : node_list) {
             node->compile(os, dest_reg, context);
             if (context.return_flag) {
+                context.return_flag = false; // Reset flag
                 break; // Terminate early on return
             }
         }

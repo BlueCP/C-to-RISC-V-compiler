@@ -26,8 +26,11 @@ public:
         scope_stack.push_back(new Scope(identifier));
         // TODO codgen
         // 1. Move the stack pointer down (by STACK_FRAME_SIZE).
-        // 2. Push the frame pointer to the stack.
-        // 3. Move the frame pointer up (to the bottom of the previous stack frame).
+        // 2. Push the return address to the stack.
+        //   - this is redunant in most cases, but it simplifes implementation to
+        //     just do it every time.
+        // 3. Push the frame pointer to the stack.
+        // 4. Move the frame pointer up (to the bottom of the previous stack frame).
     }
 
     // Leave the current scope and deallocate the stack frame.
@@ -35,11 +38,13 @@ public:
         delete scope_stack.back();
         scope_stack.pop_back();
         // TODO codgen
-        // 1. Load the frame pointer from the stack.
-        // 2. Move the stack pointer up to deallocate the stack frame.
+        // 1. Load the return address from the stack.
+        // 2. Load the frame pointer from the stack.
+        // 3. Move the stack pointer up to deallocate the stack frame.
     }
 
-    // Returns the next available register.
+    // Returns the next available register. Useful for temporary results in calculations.
+    // NOTE: Every get_reg should be matched with a free_reg.
     int get_reg() {
         for (int i = 0; i < 32; i++) {
             if (reg_available[i]) {
@@ -55,15 +60,10 @@ public:
         reg_available[reg_id] = true;
     }
 
-    // Creates a new variable in the current stack frame.
+    // Prepares to create a new variable in the current stack frame.
     // Returns the fp offset.
     int new_variable(std::string type, std::string identifier) {
         return scope_stack.back()->new_variable(type, identifier);
-    }
-
-    // Stores a register in the stack using the given fp offset.
-    void store_reg(std::ostream& os, int reg, int fp_offset) {
-        // TODO codegen
     }
 
     // Returns the fp offset of a variable relative to the current fp.
@@ -81,12 +81,19 @@ public:
             return -1; // -1 must be an invalid value as it is not a multiple of 4.
         } else {
             return var->fp_offset + (STACK_FRAME_SIZE * depth);
-            // Since fp_offset is relevant to the variable's own stack frame, not the current one,
-            // we have to readjust it by using how many frames deep we have to go.
+            // Since fp_offset is relative to the variable's own stack frame, not the current one,
+            // we have to readjust it by counting how many frames deep we have to go.
         }
     }
 
+    // Stores a register in the stack using the given fp offset.
+    // Used for both initialising (with new_variable) and reassigning (with find_fp_offset).
+    void store_reg(std::ostream& os, int reg, int fp_offset) {
+        // TODO codegen
+    }
+
     // Loads a register from the stack using the given fp offset.
+    // Used together with find_fp_offset.
     void load_reg(std::ostream& os, int reg, int fp_offset) {
         // TODO codegen
     }
@@ -98,8 +105,9 @@ public:
                               1, 1, 1, 1, 1, 1, 1, 1};
         // Aside from first 5 registers, mark a0 (return value register) as unavailable just in case.
 
-    bool function_declarator_start;
-    bool return_flag;
+    bool function_declarator_start = true; // Are we are the header or footer of a function definition?
+    bool return_flag = false; // Have we just reached a return statement, thus ending the compilation of statements prematurely?
+    bool storing_var = false; // Are we storing an expression, rather than reading it into dest_reg?
 
 };
 

@@ -50,9 +50,12 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         if (context.function_declarator_start) {
-            // TODO codegen function definition header.
+            // TODO codegen function name label.
+            context.new_scope(os, identifier);
+            // TODO codegen push argument registers to the stack.
         } else {
-            // TODO codegen function definition footer.
+            context.leave_scope(os);
+            // TODO codegen jump to return address.
         }
     }
 

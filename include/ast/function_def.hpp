@@ -26,8 +26,6 @@ public:
         context.function_declarator_start = false;
 
         declarator->compile(os, dest_reg, context); // Generate function footer
-
-        context.return_flag = false;
     }
 
     std::string return_type;

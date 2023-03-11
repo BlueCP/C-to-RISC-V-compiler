@@ -25,7 +25,11 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         int fp_offset = context.find_fp_offset(identifier);
-        context.load_reg(os, dest_reg, fp_offset);
+        if (context.storing_var) {
+            context.store_reg(os, dest_reg, fp_offset);
+        } else {
+            context.load_reg(os, dest_reg, fp_offset);
+        }
 
         // Note that Identifier is used as part of more complex expressions, such as
         // array accesses and funciton calls. However, that implementation is left to those
