@@ -24,7 +24,7 @@ public:
     Identifier(std::string s) : identifier(s) {}
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO put number corresponding to variable corresponding to identifier in des_reg.
+        // TODO put number corresponding to variable corresponding to identifier in dest_reg.
 
         // Note that Identifier is used as part of more complex expressions, such as
         // array accesses and funciton calls. However, that implementation is left to those
