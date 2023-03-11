@@ -7,9 +7,7 @@ class Declaration : public Node {
 public:
 
     Declaration(std::string t, std::vector<Declarator*> d)
-        : type(t), declarators(d) {
-
-    }
+        : type(t), declarators(d) {}
 
     ~Declaration() {
         for (auto d : declarators) {
@@ -18,8 +16,7 @@ public:
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO: variable declaration.
-        // Use InitDeclarator::compile as well.
+        // TODO
     }
 
     std::string type;

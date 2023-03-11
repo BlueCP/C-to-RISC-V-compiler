@@ -6,15 +6,9 @@ class Declarator : public Node {
 
 public:
 
-    Declarator(std::string _i)
-        : identifier(_i) {
+    Declarator(std::string _i) : identifier(_i) {}
 
-    }
-
-    Declarator(std::string i, bool p)
-        : identifier(i), pointer(p) {
-
-    }
+    Declarator(std::string i, bool p) : identifier(i), pointer(p) {}
 
     std::string identifier;
     bool pointer;
@@ -25,17 +19,14 @@ class InitDeclarator : public Declarator {
 
 public:
 
-    InitDeclarator(std::string i, bool p, Node* e)
-        : Declarator(i, p), expression(e) {
-
-    }
+    InitDeclarator(std::string i, bool p, Node* e) : Declarator(i, p), expression(e) {}
 
     ~InitDeclarator() {
         delete expression;
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO: variable initialisation.
+        // TODO
     }
 
     Node* expression;
@@ -47,13 +38,9 @@ class FunctionDeclarator : public Declarator {
 public:
 
     FunctionDeclarator(std::string _i, std::vector<ParameterDeclaration*> _p)
-        : Declarator(_i), parameter_list(_p) {
-    }
+        : Declarator(_i), parameter_list(_p) {}
 
-    FunctionDeclarator(std::string _i)
-        : Declarator(_i) {
-
-    }
+    FunctionDeclarator(std::string _i) : Declarator(_i) {}
 
     ~FunctionDeclarator() {
         for (auto p : parameter_list) {
@@ -62,7 +49,7 @@ public:
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO: Take care of arguments at the beginning of a function.
+        // TODO
     }
 
     std::vector<ParameterDeclaration*> parameter_list;
@@ -73,10 +60,7 @@ class ParameterDeclaration : public Node {
 
 public:
 
-    ParameterDeclaration(std::string _t, Declarator* _d)
-        : type(_t), declarator(_d) {
-
-    }
+    ParameterDeclaration(std::string _t, Declarator* _d) : type(_t), declarator(_d) {}
 
     ~ParameterDeclaration() {
         delete declarator;

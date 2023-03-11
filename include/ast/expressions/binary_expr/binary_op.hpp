@@ -6,10 +6,7 @@ class BinaryOp : public Node {
 
 public:
 
-    BinaryOp(Node* l, Node* r)
-        : left(l), right(r) {
-
-    }
+    BinaryOp(Node* l, Node* r) : left(l), right(r) {}
 
     ~BinaryOp() {
         delete left;

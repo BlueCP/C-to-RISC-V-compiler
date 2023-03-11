@@ -6,10 +6,7 @@ class TernaryOp : public Node {
 
 public:
 
-    TernaryOp(Node* c, Node* e1, Node* e2)
-        : condition(c), expr1(e1), expr2(e2) {
-
-    }
+    TernaryOp(Node* c, Node* e1, Node* e2) : condition(c), expr1(e1), expr2(e2) {}
 
     ~TernaryOp() {
         delete condition;
@@ -18,7 +15,7 @@ public:
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO: variable assignment.
+        // TODO
     }
 
     Node* condition;

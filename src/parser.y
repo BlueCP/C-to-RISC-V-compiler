@@ -37,28 +37,37 @@
 
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
-
-
+/*
+The following statements are invalid and are left only to keep track of what there is left to implement.
+*/
+/*
 %type <expr> argument_expression_list
 %type <expr> struct_or_union_specifier struct_declaration_list struct_declaration specifier_qualifier_list struct_declarator_list
-%type <expr> struct_declarator enum_specifier enumerator_list enumerator pointer type_qualifier_list
-%type <expr> identifier_list type_name abstract_declarator
-%type <expr> direct_abstract_declarator initializer_list labeled_statement
-%type <expr> selection_statement iteration_statement
+%type <expr> struct_declarator enum_specifier enumerator_list enumerator
+%type <expr> type_name abstract_declarator direct_abstract_declarator initializer_list
+*/
 
+// Unused symbols
+%type <node> type_qualifier type_qualifier_list identifier_list
 
-
+// Primitives
 %type <number> CONSTANT
-
-%type <string> IDENTIFIER STRING_LITERAL unary_operator assignment_operator storage_class_specifier 
-%type <string> struct_or_union type_qualifier
+%type <string> IDENTIFIER STRING_LITERAL unary_operator assignment_operator storage_class_specifier pointer
+%type <string> struct_or_union
 %type <string> declaration_specifiers type_specifier
 
-%type <node> external_declaration statement jump_statement function_definition
+// Top-level
+%type <node> external_declaration function_definition
+// Expressions
 %type <node> primary_expression postfix_expression unary_expression cast_expression multiplicative_expression
 %type <node> additive_expression shift_expression relational_expression equality_expression and_expression exclusive_or_expression
 %type <node> inclusive_or_expression logical_and_expression logical_or_expression conditional_expression assignment_expression
-%type <node> expression constant_expression initializer declaration expression_statement
+%type <node> expression constant_expression
+// Statements
+%type <node> expression_statement iteration_statement selection_statement labeled_statement statement jump_statement
+// Other stuff
+%type <node> initializer declaration
+// Node lists
 %type <node_list> compound_statement statement_list declaration_list translation_unit
 
 %type <declarator> declarator direct_declarator init_declarator
@@ -201,6 +210,7 @@ conditional_expression
 assignment_expression
   : conditional_expression { $$ = $1; }
   | unary_expression assignment_operator assignment_expression {
+    // Expand assignments like x += 5 into x = x + 5.
     if (*$2 == '=') {
       $$ = new AssignmentExpr($1, $3);
     } else if (*$2 == '*=') {
@@ -231,17 +241,17 @@ assignment_expression
   ;
 
 assignment_operator
-  : '=' { $$ = new std::string("="); }
-  | MUL_ASSIGN
-  | DIV_ASSIGN
-  | MOD_ASSIGN
-  | ADD_ASSIGN
-  | SUB_ASSIGN
-  | LEFT_ASSIGN
-  | RIGHT_ASSIGN
-  | AND_ASSIGN
-  | XOR_ASSIGN
-  | OR_ASSIGN
+  : '=' { $$ = new std::string('='); }
+  | MUL_ASSIGN { $$ = new std::string('*='); }
+  | DIV_ASSIGN { $$ = new std::string('/='); }
+  | MOD_ASSIGN { $$ = new std::string('%='); }
+  | ADD_ASSIGN { $$ = new std::string('+='); }
+  | SUB_ASSIGN { $$ = new std::string('-='); }
+  | LEFT_ASSIGN { $$ = new std::string('<<='); }
+  | RIGHT_ASSIGN { $$ = new std::string('>>='); }
+  | AND_ASSIGN { $$ = new std::string('&='); }
+  | XOR_ASSIGN { $$ = new std::string('^='); }
+  | OR_ASSIGN { $$ = new std::string('|='); }
   ;
 
 expression
@@ -377,16 +387,16 @@ declarator
 
 direct_declarator
   : IDENTIFIER { $$ = new Declarator(*$1); delete $1; }
-  | '(' declarator ')'
+  | '(' declarator ')' { $$ = $2; }
   | direct_declarator '[' constant_expression ']' // Array definition (with number of elements).
   | direct_declarator '[' ']'
   | direct_declarator '(' parameter_type_list ')' { $$ = new FunctionDeclarator($1->identifier, *$3); delete $3; }
-  | direct_declarator '(' identifier_list ')'
+  | direct_declarator '(' identifier_list ')' // Do not implement K&R-style function declarations.
   | direct_declarator '(' ')' { $$ = new FunctionDeclarator($1->identifier); }
   ;
 
 pointer
-  : '*'
+  : '*' { $$ = new std::string('*'); }
   | '*' type_qualifier_list
   | '*' pointer
   | '*' type_qualifier_list pointer
@@ -400,7 +410,7 @@ type_qualifier_list
 
 parameter_type_list
   : parameter_list { $$ = $1; }
-  | parameter_list ',' ELLIPSIS
+  | parameter_list ',' ELLIPSIS // Do not implement this.
   ;
 
 parameter_list
@@ -420,15 +430,10 @@ parameter_declaration
   | declaration_specifiers
   ;
 
+// Do not implement K&R-style function declarations.
 identifier_list
-  : IDENTIFIER {
-    $$ = new std::vector<std::string*>();
-    $$->push_back($1);
-  }
-  | identifier_list ',' IDENTIFIER {
-    $$ = $1;
-    $$->push_back($3);
-  }
+  : IDENTIFIER
+  | identifier_list ',' IDENTIFIER
   ;
 
 type_name
@@ -486,8 +491,8 @@ compound_statement
   | '{' declaration_list '}' { $$ = $2; }
   | '{' declaration_list statement_list '}' {
     $$ = new NodeList();
-    $$->add_list($2);
-    $$->add_list($3);
+    $$->add_node($2);
+    $$->add_node($3);
   }
   ;
 
@@ -502,7 +507,7 @@ statement_list
   ;
 
 expression_statement
-  : ';'
+  : ';' { $$ = new EmptyNode(); }
   | expression ';' { $$ = $1; }
   ;
 

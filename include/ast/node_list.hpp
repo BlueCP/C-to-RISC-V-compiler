@@ -28,12 +28,6 @@ public:
         node_list.push_back(node);
     }
 
-    void add_list(NodeList* list) {
-        for (auto node : list->node_list) {
-            node_list.push_back(node);
-        }
-    }
-
     std::vector<Node*> node_list;
 
 };

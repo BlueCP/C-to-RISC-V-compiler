@@ -91,9 +91,7 @@ class VarInfo {
 public:
 
     VarInfo(std::string t, bool p, std::string i)
-        : type(t), is_pointer(p), identifier(i) {
-
-    }
+        : type(t), is_pointer(p), identifier(i) {}
 
     std::string type;
     bool is_pointer;
