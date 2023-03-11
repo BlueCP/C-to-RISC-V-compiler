@@ -53,6 +53,8 @@ public:
     }
 
     std::stack<Scope*> scope_stack;
+    bool function_declarator_start;
+    bool return_flag;
 
 };
 

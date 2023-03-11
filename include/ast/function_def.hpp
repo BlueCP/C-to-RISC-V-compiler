@@ -17,7 +17,17 @@ public:
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO
+        context.return_flag = false;
+        context.function_declarator_start = true;
+
+        declarator->compile(os, dest_reg, context); // Generate function header
+        compound_statement->compile(os, dest_reg, context); // Generate function body
+
+        context.function_declarator_start = false;
+
+        declarator->compile(os, dest_reg, context); // Generate function footer
+
+        context.return_flag = false;
     }
 
     std::string return_type;

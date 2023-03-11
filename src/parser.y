@@ -490,19 +490,18 @@ compound_statement
   | '{' statement_list '}' { $$ = $2; }
   | '{' declaration_list '}' { $$ = $2; }
   | '{' declaration_list statement_list '}' {
-    $$ = new NodeList();
+    $$ = new StatementList();
     $$->add_node($2);
     $$->add_node($3);
   }
   ;
 
 declaration_list
-  : declaration { $$ = new NodeList($1); }
-  | declaration_list declaration { $$ = $1; $$->add_node($2); }
+  : declaration { $$ = new StatementList($2); }
   ;
 
 statement_list
-  : statement { $$ = new NodeList($1); }
+  : statement { $$ = new StatementList($1); }
   | statement_list statement { $$ = $1; $$->add_node($2); }
   ;
 

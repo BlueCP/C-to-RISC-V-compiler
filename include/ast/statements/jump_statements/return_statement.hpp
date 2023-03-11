@@ -17,8 +17,10 @@ public:
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO
-        // Note that if expression is nullptr, there is no value to be returned.
+        if (expression != nullptr) {
+            expression->compile(os, 10, context); // Into return value register
+        }
+        context.return_flag = true;
     }
 
     Node* expression;

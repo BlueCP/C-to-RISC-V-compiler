@@ -1,6 +1,7 @@
 #pragma once
 
 #include "node.hpp"
+#include "declarator.hpp"
 
 class Declaration : public Node {
 
@@ -16,7 +17,10 @@ public:
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO
+        for (auto d : declarators) {
+            d->compile(os, dest_reg, context);
+        }
+        // Update this to work with more types (other than int) later.
     }
 
     std::string type;
