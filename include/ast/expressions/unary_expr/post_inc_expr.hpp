@@ -10,6 +10,10 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         // TODO
+        //do smth
+        std::cout << "addi " << reg_name[dest_reg] << ", " << reg_name[dest_reg] << ", 1" << std::endl;
+
+
     }
 
 };

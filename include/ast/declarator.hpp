@@ -51,9 +51,9 @@ public:
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         if (context.function_declarator_start) {
             // TODO function definition header.
-            std::cout << "." << identifier << ":" << std::endl;
+            std::cout << identifier << ":" << std::endl;
             //compile the rest
-        } else {
+        } else{
             // TODO function definition footer.
             std::cout << "jr ra" << std::endl;
         }
