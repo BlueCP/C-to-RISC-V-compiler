@@ -6,7 +6,9 @@ class PreDecExpr : public UnaryOp {
 
 public:
 
-    PreDecExpr(Node* e) : UnaryOp(e) {}
+    PreDecExpr(Node* e) : UnaryOp(e) {
+        value = e->value - 1;
+    }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         // TODO

@@ -6,7 +6,9 @@ class LogicalOrExpr : public BinaryOp {
 
 public:
 
-    LogicalOrExpr(Node* l, Node* r) : BinaryOp(l, r) {}
+    LogicalOrExpr(Node* l, Node* r) : BinaryOp(l, r) {
+        value = l->value || r->value;
+    }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         auto [reg1, reg2] = eval(os, context);

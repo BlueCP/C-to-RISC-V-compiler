@@ -6,7 +6,9 @@ class PreIncExpr : public UnaryOp {
 
 public:
 
-    PreIncExpr(Node* e) : UnaryOp(e) {}
+    PreIncExpr(Node* e) : UnaryOp(e) {
+        value = e->value + 1;
+    }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         // TODO

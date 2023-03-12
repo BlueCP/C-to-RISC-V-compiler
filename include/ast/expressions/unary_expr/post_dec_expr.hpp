@@ -6,7 +6,9 @@ class PostDecExpr : public UnaryOp {
 
 public:
 
-    PostDecExpr(Node* e) : UnaryOp(e) {}
+    PostDecExpr(Node* e) : UnaryOp(e) {
+        value = e->value;
+    }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         // TODO

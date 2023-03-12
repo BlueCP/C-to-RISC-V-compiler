@@ -6,7 +6,9 @@ class BitNotExpr : public UnaryOp {
 
 public:
 
-    BitNotExpr(Node* e) : UnaryOp(e) {}
+    BitNotExpr(Node* e) : UnaryOp(e) {
+        value = ~e->value;
+    }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         expr->compile(os, dest_reg, context);
