@@ -2,15 +2,17 @@
 
 #include "node.hpp"
 #include "declarator.hpp"
+#include "type_specifier.hpp"
 
 class Declaration : public Node {
 
 public:
 
-    Declaration(std::string t, std::vector<Declarator*> d)
+    Declaration(TypeSpec* t, std::vector<Declarator*> d)
         : type(t), declarators(d) {}
 
     ~Declaration() {
+        delete type;
         for (auto d : declarators) {
             delete d;
         }
@@ -23,7 +25,7 @@ public:
         // Update this to work with more types (other than int) later.
     }
 
-    std::string type;
+    TypeSpec* type;
     std::vector<Declarator*> declarators;
 
 };

@@ -25,6 +25,7 @@
   std::vector<InitDeclarator*> init_declarator_list;
   ParameterDeclaration* parameter;
   std::vector<ParameterDeclaration*>* parameter_list;
+  TypeSpec* type_spec;
 }
 
 %token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
@@ -55,7 +56,6 @@ The following statements are invalid and are left only to keep track of what the
 %type <number> CONSTANT
 %type <string> IDENTIFIER STRING_LITERAL unary_operator assignment_operator storage_class_specifier pointer
 %type <string> struct_or_union
-%type <string> declaration_specifiers type_specifier
 
 // Top-level
 %type <node> external_declaration function_definition
@@ -67,16 +67,18 @@ The following statements are invalid and are left only to keep track of what the
 // Statements
 %type <node> expression_statement iteration_statement selection_statement labeled_statement statement jump_statement
 // Other stuff
-%type <node> declaration
+%type <node> declaration enumerator
 // Node lists
 %type <node_list> compound_statement statement_list declaration_list translation_unit argument_expression_list
-%type <node_list> initializer initializer_list
+%type <node_list> initializer initializer_list enumerator_list
 
 %type <declarator> declarator direct_declarator init_declarator
 %type <declarator_list> init_declarator_list
 
 %type <parameter> parameter_declaration
 %type <parameter_list> parameter_list parameter_type_list
+
+%type <type_spec> enum_specifier type_specifier declaration_specifiers
 
 %start translation_unit
 
@@ -269,7 +271,7 @@ constant_expression
 // (add function declarations later).
 declaration
   : declaration_specifiers ';'
-  | declaration_specifiers init_declarator_list ';' { $$ = new Declaration(*$1, *$2); delete $1; delete $2; }
+  | declaration_specifiers init_declarator_list ';' { $$ = new Declaration($1, *$2); delete $2; }
   ;
 
 // For now, assume that a declaration specifier can only contain one type.
@@ -311,14 +313,14 @@ type_specifier
   : VOID
   | CHAR
   | SHORT
-  | INT { $$ = new std::string("int"); }
+  | INT { $$ = new IntType(); }
   | LONG
   | FLOAT
   | DOUBLE
   | SIGNED
   | UNSIGNED
   | struct_or_union_specifier
-  | enum_specifier
+  | enum_specifier { $$ = $1; }
   | TYPE_NAME
   ;
 
@@ -361,19 +363,19 @@ struct_declarator
   ;
 
 enum_specifier
-  : ENUM '{' enumerator_list '}'
-  | ENUM IDENTIFIER '{' enumerator_list '}'
-  | ENUM IDENTIFIER
+  : ENUM '{' enumerator_list '}' { $$ = new EnumSpecifier($3); }
+  | ENUM IDENTIFIER '{' enumerator_list '}' { $$ = new EnumSpecifier(*$2, $4); delete $2; }
+  | ENUM IDENTIFIER { $$ = new EnumType(*$2); delete $2; }
   ;
 
 enumerator_list
-  : enumerator
-  | enumerator_list ',' enumerator
+  : enumerator { $$ = new NodeList($1); }
+  | enumerator_list ',' enumerator { $$ = $1; $$->add_node($3); }
   ;
 
 enumerator
-  : IDENTIFIER
-  | IDENTIFIER '=' constant_expression
+  : IDENTIFIER { $$ = new Enumerator(*$1); delete $1; }
+  | IDENTIFIER '=' constant_expression { $$ = new Enumerator(*$1, $3); delete $1; }
   ;
 
 // Do not implement either of these keywords.

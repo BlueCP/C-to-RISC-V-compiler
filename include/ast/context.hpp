@@ -123,6 +123,11 @@ public:
         std::cout << "lw " << reg_name[reg] << ", fp(" << fp_offset + array_offset_reg << ")" << std::endl;
     }
 
+    std::map<std::string, int> enum_map;
+    // A mapping between the names of enum elements and their values.
+    // We are assuming global scope for enums, and no differentiation based on their identifiers.
+    int enum_counter = 0;
+
     std::vector<Scope*> scope_stack;
     bool reg_available[32] = {0, 0, 0, 0, 0, 1, 1, 1,
                               1, 1, 0, 1, 1, 1, 1, 1,
