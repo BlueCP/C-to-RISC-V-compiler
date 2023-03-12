@@ -15,12 +15,6 @@ public:
 
 };
 
-class IntType : public TypeSpec {
-
-    IntType() : TypeSpec("int", 4) {}
-
-};
-
 // EnumType is used if a variable or function is declared as type enum (identifier).
 class EnumType : public TypeSpec {
 
@@ -37,8 +31,13 @@ public:
 
     EnumSpecifier(std::string i, NodeList* l) : TypeSpec(i), enum_list(l) {}
 
+    ~EnumSpecifier() {
+        delete enum_list;
+    }
+
     void compile(std::ostream& os, int dest_reg, Context& context) {
-        // TODO
+        context.enum_counter = 0;
+        enum_list->compile(os, dest_reg, context);
     }
 
     NodeList* enum_list;
