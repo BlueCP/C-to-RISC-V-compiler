@@ -1,74 +1,35 @@
 #pragma once
 
 #include "node.hpp"
-#include "node_list.hpp"
 
 class Declarator : public Node {
 
 public:
 
-    Declarator(std::string i) : Node(i) {}
+    Declarator(std::string _i) : identifier(_i) {}
 
-    Declarator(std::string i, bool p) : Node(i), pointer(p) {}
+    Declarator(std::string i, bool p) : identifier(i), pointer(p) {}
 
-    // By default, Declarator declares a single variable.
-    void compile(std::ostream& os, int dest_reg, Context& context) {
-        if (context.in_global()) {
-            // TODO codegen declare a new global variable
-        } else {
-            context.new_variable(4, identifier);
-        }
-    }
-
+    std::string identifier;
     bool pointer;
 
 };
 
-class InitDeclarator : public Node {
+class InitDeclarator : public Declarator {
 
 public:
 
-    InitDeclarator(Declarator* d, NodeList* l) : declarator(d), initialisers(l) {}
+    InitDeclarator(std::string i, bool p, Node* e) : Declarator(i, p), expression(e) {}
 
     ~InitDeclarator() {
-        delete declarator;
-        delete initialisers;
+        delete expression;
     }
 
-    void compile(std::ostream& os, int dest_reg, Context& context) {
-        if (context.in_global()) {
-            declarator->compile(os, dest_reg, context); // Create label in global scope
-            for (int i = 0; i < initialisers->node_list.size(); i++) {
-                // TODO codegen
-                // Instance of Constant has identifier equal to the number it represents.
-            }
-        } else {
-            declarator->compile(os, dest_reg, context); // Prepare to add variable, allocate space in stack
-            int fp_offset = context.find_fp_offset(declarator->identifier); // Get fp offset
-            for (int i = 0; i < initialisers->node_list.size(); i++) {
-                initialisers->node_list[i]->compile(os, dest_reg, context);
-                context.store_reg(os, dest_reg, fp_offset + (4 * i));
-            }
-            // If the variable is not an array, this for loop will just execute once, giving the desired behaviour.
-        }
+    void compile(std::ostream& os, int dest_reg, Context& context) const {
+        // TODO
     }
 
-    Declarator* declarator;
-    NodeList* initialisers;
-
-};
-
-class ArrayDeclarator : public Declarator {
-
-public:
-
-    ArrayDeclarator(std::string i, bool p, int s) : Declarator(i), size(s) {}
-
-    void compile(std::ostream& os, int dest_reg, Context& context) {
-        context.new_variable(4 * size, identifier);
-    }
-
-    int size;
+    Node* expression;
 
 };
 
@@ -76,10 +37,10 @@ class FunctionDeclarator : public Declarator {
 
 public:
 
-    FunctionDeclarator(std::string i, std::vector<ParameterDeclaration*> p)
-        : Declarator(i), parameter_list(p) {}
+    FunctionDeclarator(std::string _i, std::vector<ParameterDeclaration*> _p)
+        : Declarator(_i), parameter_list(_p) {}
 
-    FunctionDeclarator(std::string i) : Declarator(i) {}
+    FunctionDeclarator(std::string _i) : Declarator(_i) {}
 
     ~FunctionDeclarator() {
         for (auto p : parameter_list) {
@@ -89,12 +50,12 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         if (context.function_declarator_start) {
-            // TODO codegen function name label.
-            context.new_scope(os, identifier);
-            // TODO codegen push argument registers to the stack.
+            // TODO function definition header.
+            std::cout << "." << identifier << ":" << std::endl;
+            //compile the rest
         } else {
-            context.leave_scope(os);
-            // TODO codegen jump to return address.
+            // TODO function definition footer.
+            std::cout << "jr ra" << std::endl;
         }
     }
 
@@ -106,7 +67,7 @@ class ParameterDeclaration : public Node {
 
 public:
 
-    ParameterDeclaration(std::string t, Declarator* d) : type(t), declarator(d) {}
+    ParameterDeclaration(std::string _t, Declarator* _d) : type(_t), declarator(_d) {}
 
     ~ParameterDeclaration() {
         delete declarator;
