@@ -77,6 +77,14 @@ public:
         return reg;
     }
 
+    // Returns the next available register after having set it to zero.
+    // NOTE: Every get_clean_reg should be matched with a free_reg.
+    int get_clean_reg(std::ostream& os) {
+        int reg = get_reg();
+        // TODO codegen set this reg to 0.
+        return reg;
+    }
+
     // Marks a given register as available.
     void free_reg(int reg_id) {
         reg_available[reg_id] = true;
