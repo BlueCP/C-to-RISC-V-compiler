@@ -13,7 +13,11 @@ public:
 
     // By default, Declarator declares a single variable.
     void compile(std::ostream& os, int dest_reg, Context& context) {
-        context.new_variable(4, identifier);
+        if (context.in_global()) {
+            // TODO codegen declare a new global variable
+        } else {
+            context.new_variable(4, identifier);
+        }
     }
 
     bool pointer;
@@ -32,13 +36,21 @@ public:
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) {
-        declarator->compile(os, dest_reg, context); // Prepare to add variable, allocate space in stack
-        int fp_offset = context.find_fp_offset(declarator->identifier); // Get fp offset
-        for (int i = 0; i < initialisers->node_list.size(); i++) {
-            initialisers->node_list[i]->compile(os, dest_reg, context);
-            context.store_reg(os, dest_reg, fp_offset + (4 * i));
+        if (context.in_global()) {
+            declarator->compile(os, dest_reg, context); // Create label in global scope
+            for (int i = 0; i < initialisers->node_list.size(); i++) {
+                // TODO codegen
+                // Instance of Constant has identifier equal to the number it represents.
+            }
+        } else {
+            declarator->compile(os, dest_reg, context); // Prepare to add variable, allocate space in stack
+            int fp_offset = context.find_fp_offset(declarator->identifier); // Get fp offset
+            for (int i = 0; i < initialisers->node_list.size(); i++) {
+                initialisers->node_list[i]->compile(os, dest_reg, context);
+                context.store_reg(os, dest_reg, fp_offset + (4 * i));
+            }
+            // If the variable is not an array, this for loop will just execute once, giving the desired behaviour.
         }
-        // If the variable is not an array, this for loop will just execute once, giving the desired behaviour.
     }
 
     Declarator* declarator;

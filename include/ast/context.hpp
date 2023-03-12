@@ -43,6 +43,10 @@ public:
         // 3. Move the stack pointer up to deallocate the stack frame.
     }
 
+    bool in_global() {
+        return scope_stack.back()->identifier == "global";
+    }
+
     // Returns the next available register. Useful for temporary results in calculations.
     // NOTE: Every get_reg should be matched with a free_reg.
     int get_reg() {
