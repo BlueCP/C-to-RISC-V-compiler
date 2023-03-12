@@ -15,6 +15,7 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         // TODO codegen
+        // Update context.continue_label and context.break_label.
     }
 
     Node* condition;
