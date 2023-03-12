@@ -6,18 +6,24 @@ class Enumerator : public Node {
 
 public:
 
-    Enumerator(std::string i) : Node(identifier), value(nullptr) {}
+    Enumerator(std::string i) : Node(identifier), expr(nullptr) {}
 
-    Enumerator(std::string i, Node* v) : Node(i), value(v) {}
+    Enumerator(std::string i, Node* v) : Node(i), expr(v) {}
 
     ~Enumerator() {
-        delete value;
+        delete expr;
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) {
-        // TODO AST add enumerator-value pair to context.
+        if (expr == nullptr) {
+            context.enum_map[identifier] = context.enum_counter;
+        } else {
+            context.enum_map[identifier] = expr->value;
+            context.enum_counter = expr->value;
+        }
+        context.enum_counter++;
     }
 
-    Node* value;
+    Node* expr;
 
 };

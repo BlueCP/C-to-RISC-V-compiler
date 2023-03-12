@@ -45,8 +45,7 @@ The following statements are invalid and are left only to keep track of what the
 */
 /*
 %type <expr> struct_or_union_specifier struct_declaration_list struct_declaration specifier_qualifier_list struct_declarator_list
-%type <expr> struct_declarator enum_specifier enumerator_list enumerator
-%type <expr> type_name abstract_declarator direct_abstract_declarator
+%type <expr> struct_declarator type_name abstract_declarator direct_abstract_declarator
 */
 
 // Unused symbols
@@ -310,10 +309,10 @@ storage_class_specifier
   ;
 
 type_specifier
-  : VOID
+  : VOID { $$ = new TypeSpec("void", 0); }
   | CHAR
   | SHORT
-  | INT { $$ = new IntType(); }
+  | INT { $$ = new TypeSpec("int", 4); }
   | LONG
   | FLOAT
   | DOUBLE
