@@ -21,6 +21,8 @@
   NodeList* node_list;
   Declarator* declarator;
   std::vector<Declarator*> declarator_list;
+  InitDeclarator* init_declarator;
+  std::vector<InitDeclarator*> init_declarator_list;
   ParameterDeclaration* parameter;
   std::vector<ParameterDeclaration*>* parameter_list;
 }
@@ -41,10 +43,9 @@
 The following statements are invalid and are left only to keep track of what there is left to implement.
 */
 /*
-%type <expr> argument_expression_list
 %type <expr> struct_or_union_specifier struct_declaration_list struct_declaration specifier_qualifier_list struct_declarator_list
 %type <expr> struct_declarator enum_specifier enumerator_list enumerator
-%type <expr> type_name abstract_declarator direct_abstract_declarator initializer_list
+%type <expr> type_name abstract_declarator direct_abstract_declarator
 */
 
 // Unused symbols
@@ -66,9 +67,10 @@ The following statements are invalid and are left only to keep track of what the
 // Statements
 %type <node> expression_statement iteration_statement selection_statement labeled_statement statement jump_statement
 // Other stuff
-%type <node> initializer declaration
+%type <node> declaration
 // Node lists
-%type <node_list> compound_statement statement_list declaration_list translation_unit
+%type <node_list> compound_statement statement_list declaration_list translation_unit argument_expression_list
+%type <node_list> initializer initializer_list
 
 %type <declarator> declarator direct_declarator init_declarator
 %type <declarator_list> init_declarator_list
@@ -89,9 +91,9 @@ primary_expression
 
 postfix_expression
   : primary_expression { $$ = $1; }
-  | postfix_expression '[' expression ']' // Array access
-  | postfix_expression '(' ')' // Function call with no args
-  | postfix_expression '(' argument_expression_list ')' // Function call with args
+  | postfix_expression '[' expression ']' { $$ = new ArrayIndex($1, $3); }
+  | postfix_expression '(' ')' { $$ = new FunctionCall($1->identifier); delete $1; }
+  | postfix_expression '(' argument_expression_list ')' { $$ = new FunctionCall($1->identifier, $3); delete $1; }
   | postfix_expression '.' IDENTIFIER // Struct member access
   | postfix_expression PTR_OP IDENTIFIER // Deference + struct member access
   | postfix_expression INC_OP { $$ = new PostIncExpr($1); }
@@ -99,8 +101,8 @@ postfix_expression
   ;
 
 argument_expression_list
-  : assignment_expression
-  | argument_expression_list ',' assignment_expression
+  : assignment_expression { $$ = new NodeList($1); }
+  | argument_expression_list ',' assignment_expression { $$ = $1; $$->add_node($3); }
   ;
 
 unary_expression
@@ -292,9 +294,8 @@ init_declarator_list
   ;
 
 init_declarator
-  : declarator { $$ = new InitDeclarator($1->identifier, $1->pointer, new Constant(0)); }
-  // By default, initialise all variables to zero.
-  | declarator '=' initializer { $$ = new InitDeclarator($1->identifier, $1->pointer, $3); }
+  : declarator { $$ = $1; }
+  | declarator '=' initializer { $$ = new InitDeclarator($1, $3); }
   ;
 
 // Implement typedef later.
@@ -389,11 +390,11 @@ declarator
 direct_declarator
   : IDENTIFIER { $$ = new Declarator(*$1); delete $1; }
   | '(' declarator ')' { $$ = $2; }
-  | direct_declarator '[' constant_expression ']' // Array definition (with number of elements).
+  | direct_declarator '[' constant_expression ']' { $$ = new ArrayDeclarator($1->identifier, $3); delete $1; }
   | direct_declarator '[' ']'
-  | direct_declarator '(' parameter_type_list ')' { $$ = new FunctionDeclarator($1->identifier, *$3); delete $3; }
+  | direct_declarator '(' parameter_type_list ')' { $$ = new FunctionDeclarator($1->identifier, *$3); delete $1; delete $3; }
   | direct_declarator '(' identifier_list ')' // Do not implement K&R-style function declarations.
-  | direct_declarator '(' ')' { $$ = new FunctionDeclarator($1->identifier); }
+  | direct_declarator '(' ')' { $$ = new FunctionDeclarator($1->identifier); delete $1; }
   ;
 
 pointer
@@ -461,14 +462,14 @@ direct_abstract_declarator
   ;
 
 initializer
-  : assignment_expression { $$ = $1; }
-  | '{' initializer_list '}'
-  | '{' initializer_list ',' '}'
+  : assignment_expression { $$ = new NodeList($1); }
+  | '{' initializer_list '}' { $$ = $2; }
+  | '{' initializer_list ',' '}' { $$ = $2; }
   ;
 
 initializer_list
-  : initializer
-  | initializer_list ',' initializer
+  : initializer { $$ = new NodeList($1); }
+  | initializer_list ',' initializer { $$ = $1; $$->add_node($3); }
   ;
 
 statement

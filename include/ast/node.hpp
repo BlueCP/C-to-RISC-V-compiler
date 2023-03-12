@@ -16,12 +16,29 @@ static std::string reg_name[32] = {
     "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
 
+static int label_tracker = 0;
+
 struct RegPair {
     int reg1;
     int reg2;
 };
 
+// Create a unique label.
+std::string new_label(std::string base) {
+    return base + std::to_string(label_tracker++);
+}
+
 class Node {
+
 public:
+
+    Node() {}
+
+    Node(std::string i) : identifier(i) {}
+
     virtual void compile(std::ostream& os, int dest_reg, Context& context) const = 0;
+
+    std::string identifier = "";
+    // To make things easier, I have given all nodes an identifier.
+
 };

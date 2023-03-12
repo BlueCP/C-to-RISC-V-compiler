@@ -1,35 +1,62 @@
 #pragma once
 
 #include "node.hpp"
+#include "node_list.hpp"
 
 class Declarator : public Node {
 
 public:
 
-    Declarator(std::string _i) : identifier(_i) {}
+    Declarator(std::string i) : Node(i) {}
 
-    Declarator(std::string i, bool p) : identifier(i), pointer(p) {}
+    Declarator(std::string i, bool p) : Node(i), pointer(p) {}
 
-    std::string identifier;
+    // By default, Declarator declares a single variable.
+    void compile(std::ostream& os, int dest_reg, Context& context) {
+        context.new_variable(4, identifier);
+    }
+
     bool pointer;
 
 };
 
-class InitDeclarator : public Declarator {
+class InitDeclarator : public Node {
 
 public:
 
-    InitDeclarator(std::string i, bool p, Node* e) : Declarator(i, p), expression(e) {}
+    InitDeclarator(Declarator* d, NodeList* l) : declarator(d), initialisers(l) {}
 
     ~InitDeclarator() {
-        delete expression;
+        delete declarator;
+        delete initialisers;
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) {
-        expression->compile(os, dest_reg, context);
+        declarator->compile(os, dest_reg, context); // Prepare to add variable, allocate space in stack
+        int fp_offset = context.find_fp_offset(declarator->identifier); // Get fp offset
+        for (int i = 0; i < initialisers->node_list.size(); i++) {
+            initialisers->node_list[i]->compile(os, dest_reg, context);
+            context.store_reg(os, dest_reg, fp_offset + (4 * i));
+        }
+        // If the variable is not an array, this for loop will just execute once, giving the desired behaviour.
     }
 
-    Node* expression;
+    Declarator* declarator;
+    NodeList* initialisers;
+
+};
+
+class ArrayDeclarator : public Declarator {
+
+public:
+
+    ArrayDeclarator(std::string i, bool p, int s) : Declarator(i), size(s) {}
+
+    void compile(std::ostream& os, int dest_reg, Context& context) {
+        context.new_variable(4 * size, identifier);
+    }
+
+    int size;
 
 };
 
@@ -37,10 +64,10 @@ class FunctionDeclarator : public Declarator {
 
 public:
 
-    FunctionDeclarator(std::string _i, std::vector<ParameterDeclaration*> _p)
-        : Declarator(_i), parameter_list(_p) {}
+    FunctionDeclarator(std::string i, std::vector<ParameterDeclaration*> p)
+        : Declarator(i), parameter_list(p) {}
 
-    FunctionDeclarator(std::string _i) : Declarator(_i) {}
+    FunctionDeclarator(std::string i) : Declarator(i) {}
 
     ~FunctionDeclarator() {
         for (auto p : parameter_list) {
@@ -67,7 +94,7 @@ class ParameterDeclaration : public Node {
 
 public:
 
-    ParameterDeclaration(std::string _t, Declarator* _d) : type(_t), declarator(_d) {}
+    ParameterDeclaration(std::string t, Declarator* d) : type(t), declarator(d) {}
 
     ~ParameterDeclaration() {
         delete declarator;

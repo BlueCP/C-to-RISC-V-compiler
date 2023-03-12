@@ -21,7 +21,7 @@ class Identifier : public Node {
 
 public:
     
-    Identifier(std::string s) : identifier(s) {}
+    Identifier(std::string s) : Node(s) {}
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         int fp_offset = context.find_fp_offset(identifier);
@@ -36,7 +36,5 @@ public:
         // classes in the AST. Therefore, this function should just assume it is being used
         // to get the value of a variable.
     }
-
-    std::string identifier;
 
 };

@@ -12,7 +12,7 @@ public:
     static const int STACK_FRAME_SIZE = 1024; // Equal to 256 words; move than enough.
         // Making the stack frame a constant size is a design choice; it is highly inefficient,
         // but simplifies implementation greatly.
-
+    
     Context() {}
 
     ~Context() {
@@ -60,10 +60,10 @@ public:
         reg_available[reg_id] = true;
     }
 
-    // Prepares to create a new variable in the current stack frame.
+    // Prepares to create a new variable of given size in the current stack frame.
     // Returns the fp offset.
-    int new_variable(std::string type, std::string identifier) {
-        return scope_stack.back()->new_variable(type, identifier);
+    int new_variable(int size, std::string identifier) {
+        return scope_stack.back()->new_variable(size, identifier);
     }
 
     // Returns the fp offset of a variable relative to the current fp.
@@ -90,12 +90,14 @@ public:
     // Used for both initialising (with new_variable) and reassigning (with find_fp_offset).
     void store_reg(std::ostream& os, int reg, int fp_offset) {
         // TODO codegen
+        // fp + fp_offset + array_offset_reg = address to target
     }
 
     // Loads a register from the stack using the given fp offset.
     // Used together with find_fp_offset.
     void load_reg(std::ostream& os, int reg, int fp_offset) {
         // TODO codegen
+        // fp + fp_offset + array_offset_reg = address to target
     }
 
     std::vector<Scope*> scope_stack;
@@ -108,6 +110,7 @@ public:
     bool function_declarator_start = true; // Are we are the header or footer of a function definition?
     bool return_flag = false; // Have we just reached a return statement, thus ending the compilation of statements prematurely?
     bool storing_var = false; // Are we storing an expression, rather than reading it into dest_reg?
+    int array_offset_reg = 0; // Register containing array offset, zero by default (no offset).
 
 };
 
@@ -124,9 +127,9 @@ public:
     }
 
     // Add a new variable to the stack frame and return the fp offset.
-    int new_variable(std::string type, std::string identifier) {
-        variables.push_back(new VarInfo(type, identifier, fp_offset_tracker - 4));
-        fp_offset_tracker -= 4;
+    int new_variable(int size, std::string identifier) {
+        fp_offset_tracker -= size;
+        variables.push_back(new VarInfo(size, identifier, fp_offset_tracker));
         return fp_offset_tracker;
         // If the fp_offset_tracker exceeds the stack frame size, the program will have undefined behaviour.
     }
@@ -151,10 +154,11 @@ class VarInfo {
 
 public:
 
-    VarInfo(std::string t, std::string i, int f)
-        : type(t), identifier(i), fp_offset(f) {}
+    VarInfo(int s, std::string i, int f)
+        : size(s), identifier(i), fp_offset(f) {}
 
-    std::string type;
+    // std::string type;
+    int size; // In bytes
     std::string identifier;
     int fp_offset; // Frame pointer offset
 
