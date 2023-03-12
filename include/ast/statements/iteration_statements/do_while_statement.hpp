@@ -20,6 +20,7 @@ public:
         statement->compile(os, dest_reg, context);
         condition->compile(os, dest_reg, context);
         std::cout << "bne " << reg_name[dest_reg] << ", 0, ." << l1 << std::endl;
+        // Update context.continue_label and context.break_label.
     }
 
     Node* condition;

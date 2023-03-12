@@ -68,6 +68,14 @@ public:
         return -1; // In future expand on this function to avoid this happening (somehow).
     }
 
+    // Returns the next available register after having set it to zero.
+    // NOTE: Every get_clean_reg should be matched with a free_reg.
+    int get_clean_reg(std::ostream& os) {
+        int reg = get_reg();
+        // TODO codegen set this reg to 0.
+        return reg;
+    }
+
     // Marks a given register as available.
     void free_reg(int reg_id) {
         reg_available[reg_id] = true;
@@ -126,6 +134,9 @@ public:
     bool return_flag = false; // Have we just reached a return statement, thus ending the compilation of statements prematurely?
     bool storing_var = false; // Are we storing an expression, rather than reading it into dest_reg?
     int array_offset_reg = 0; // Register containing array offset, zero by default (no offset).
+    std::string continue_label;
+    std::string break_label;
+    int switch_cascade_reg = 0;
 
 };
 

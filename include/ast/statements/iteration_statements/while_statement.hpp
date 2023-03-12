@@ -23,7 +23,8 @@ public:
         statement->compile(os, dest_reg, context);
         std::cout << "j ." << l1 << std::endl;
         std::cout << "." << l2 << ":" << std::endl;
-        }
+        // Update context.continue_label and context.break_label.
+    }
 
     Node* condition;
     Node* statement;
