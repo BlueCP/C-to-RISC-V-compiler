@@ -30,10 +30,11 @@ Roshan:
 - However, this was achieved by dumping a large number of hours into this coursework, which may not be sustainable as other coursework deadlines approach.
 - Nonetheless, based on my rate of progress so far, I think it will be feasible to implement a good number of advanced features by the deadline.
 - It remains to be seen whether these classes are sufficient. It was not possible to test them as I went along, so there are likely many bugs that will need to be fixed once codegen is completed and we can run the compiler.
+- UPDATE: all AST classes for intermediate features have now been completed.
 
 ## W/C 13/3/23
 
 Roshan:
 - This week, we have one coursework deadline and a lab containing a significant amount of work, so it is unlikely we will be able to put as much time into the compiler.
-- However, based on the fast progress with the AST classes so far, I aim to finish all of the classes for the intermediate features this week, and will start working on some of the advanced features.
+- However, based on the fast progress with the AST classes so far, having written all classes needed for the intermediate features, I can start work on the advanced features.
 - I also expect to have to modify some of my classes based on feedback from Corey. Although I have tried to make my AST classes as compatible as possible with codegen, I have not actually implemented codegen so there are inevitably going to be things I did not foresee.
