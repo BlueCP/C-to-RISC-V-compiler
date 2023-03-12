@@ -39,6 +39,7 @@ public:
     virtual void compile(std::ostream& os, int dest_reg, Context& context) const = 0;
 
     std::string identifier = "";
-    // To make things easier, I have given all nodes an identifier.
+    int value = 0;
+    // To make things easier, I have given all nodes an identifier and integer value.
 
 };
