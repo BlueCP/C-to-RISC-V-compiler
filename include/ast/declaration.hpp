@@ -23,7 +23,6 @@ public:
             d->size = type->size;
             d->compile(os, dest_reg, context);
         }
-        // Update this to work with more types (other than int) later.
     }
 
     TypeSpec* type;

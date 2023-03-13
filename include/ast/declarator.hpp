@@ -4,6 +4,8 @@
 #include "node_list.hpp"
 #include "type_specifier.hpp"
 
+// TODO update these classes to work with more types than just int in the future.
+
 class Declarator : public Node {
 
 public:
@@ -72,7 +74,7 @@ public:
         if (context.in_global()) {
             // TODO codegen declare a new global array
         } else {
-            context.new_variable(4 * context.array_size, identifier);
+            context.new_variable(size * context.array_size, identifier);
         }
     }
 
