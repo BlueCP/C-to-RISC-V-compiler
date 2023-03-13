@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ast/enum/enumerator.hpp"
+
 #include "ast/expressions/binary_expr/add_expr.hpp"
 #include "ast/expressions/binary_expr/and_expr.hpp"
 #include "ast/expressions/binary_expr/assignment_expr.hpp"
@@ -60,5 +62,6 @@
 #include "ast/function_def.hpp"
 #include "ast/node_list.hpp"
 #include "ast/node.hpp"
+#include "ast/type_specifier.hpp"
 
 extern Node *parseAST();

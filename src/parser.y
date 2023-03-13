@@ -269,7 +269,7 @@ constant_expression
 // Assume this refers to a variable declaration for now
 // (add function declarations later).
 declaration
-  : declaration_specifiers ';'
+  : declaration_specifiers ';' { $$ = $1; } // Enum and struct definitions
   | declaration_specifiers init_declarator_list ';' { $$ = new Declaration($1, *$2); delete $2; }
   ;
 
@@ -391,8 +391,8 @@ declarator
 direct_declarator
   : IDENTIFIER { $$ = new Declarator(*$1); delete $1; }
   | '(' declarator ')' { $$ = $2; }
-  | direct_declarator '[' constant_expression ']' { $$ = new ArrayDeclarator($1->identifier, $3); delete $1; }
-  | direct_declarator '[' ']'
+  | direct_declarator '[' constant_expression ']' { $$ = new ArrayDeclarator($1->identifier); delete $1; }
+  | direct_declarator '[' ']' { $$ = new ArrayDeclarator($1->identifier); delete $1; }
   | direct_declarator '(' parameter_type_list ')' { $$ = new FunctionDeclarator($1->identifier, *$3); delete $1; delete $3; }
   | direct_declarator '(' identifier_list ')' // Do not implement K&R-style function declarations.
   | direct_declarator '(' ')' { $$ = new FunctionDeclarator($1->identifier); delete $1; }
@@ -428,7 +428,7 @@ parameter_list
   ;
 
 parameter_declaration
-  : declaration_specifiers declarator { $$ = new ParameterDeclaration(*$1, $2); delete $1; }
+  : declaration_specifiers declarator { $$ = new ParameterDeclaration($1, $2); }
   | declaration_specifiers abstract_declarator
   | declaration_specifiers
   ;
@@ -489,7 +489,7 @@ labeled_statement
   ;
 
 compound_statement
-  : '{' '}'
+  : '{' '}' { $$ = new EmptyNode(); }
   | '{' statement_list '}' { $$ = $2; }
   | '{' declaration_list '}' { $$ = $2; }
   | '{' declaration_list statement_list '}' {
@@ -547,7 +547,7 @@ external_declaration
 
 function_definition
   : declaration_specifiers declarator declaration_list compound_statement
-  | declaration_specifiers declarator compound_statement { $$ = new FunctionDef(*$1, $2, $3); delete $1; }
+  | declaration_specifiers declarator compound_statement { $$ = new FunctionDef($1, $2, $3); }
   | declarator declaration_list compound_statement
   | declarator compound_statement
   ;
