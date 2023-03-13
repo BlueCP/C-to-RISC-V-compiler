@@ -27,7 +27,7 @@ public:
 
         std::cout << "." << l1 << ":" << std::endl;
         if_stat->compile(os, dest_reg, context);
-        std::cout << "." << l2 << std::endl;
+        std::cout << "." << l2 << ":" << std::endl;
     }
 
     Node* condition;

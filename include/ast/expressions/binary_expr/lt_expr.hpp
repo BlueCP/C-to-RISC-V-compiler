@@ -12,7 +12,7 @@ public:
         auto [reg1, reg2] = eval(os, context);
         // TODO codegen
         std::cout << "slt " << reg_name[reg1] << ", " << reg_name[reg1] << ", " << reg_name[reg2] << std::endl;
-        std::cout << "andi " << reg_name[reg1] << ", " << reg_name[reg1] << ", " << std::endl;
+        std::cout << "andi " << reg_name[reg1] << ", " << reg_name[reg1] << ", 0xff" << std::endl;
         std::cout << "mv " << reg_name[dest_reg] << ", " << reg_name[reg1] << std::endl;
 
         free(reg1, reg2, context);
