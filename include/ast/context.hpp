@@ -53,7 +53,8 @@ public:
     }
 
     bool in_global() {
-        return scope_stack.back()->identifier == "global";
+        return scope_stack.size() == 0;
+        // Being in global scope is equivalent to there not being any stack frames (I think)
     }
 
     // Returns the next available register. Useful for temporary results in calculations.
@@ -65,7 +66,7 @@ public:
                 return i;
             }
         }
-        return -1; // In future expand on this function to avoid this happening (somehow).
+        return 10; // In future expand on this function to avoid this happening (somehow).
     }
 
     // Returns the next available register after having set it to zero.
@@ -129,7 +130,6 @@ public:
     int enum_counter = 0;
 
     int array_size = 0; // Number of elements in the array currently being declared.
-    int type_size = 0; // Number of bytes in the type currently being declared.
 
     std::vector<Scope*> scope_stack;
     bool reg_available[32] = {0, 0, 0, 0, 0, 1, 1, 1,
@@ -180,7 +180,7 @@ public:
     std::string identifier;
     std::vector<VarInfo*> variables;
     int fp_offset_tracker = -4; // Starts at -4 (the first available address in the stack frame)
-                                // and decrements by -4 for each new variable, as far as needed.
+                                // and decrements by some amount for each new variable, as far as needed.
 
 };
 
