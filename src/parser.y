@@ -74,8 +74,6 @@ The following statements are invalid and are left only to keep track of what the
 
 %type <type_spec> enum_specifier type_specifier declaration_specifiers
 
-%type <type_spec> enum_specifier type_specifier declaration_specifiers
-
 %start translation_unit
 
 %%
