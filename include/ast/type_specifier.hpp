@@ -7,11 +7,26 @@ class TypeSpec : public Node {
 
 public:
 
-    TypeSpec(std::string i) : Node(i) {}
-
-    TypeSpec(std::string i, int s) : Node(i), size(s) {}
+    TypeSpec(std::string i) : Node(i) {
+        if (i == "void") {
+            size = 0;
+        } else if (i == "char") {
+            size = 1;
+            is_signed = false;
+        } else if (i == "int") {
+            size = 4;
+        } else if (i == "float") {
+            size = 4;
+        } else if (i == "double") {
+            size = 8;
+        } else if (i == "unsigned") {
+            size = 4;
+            is_signed = false;
+        }
+    }
 
     int size; // In bytes
+    bool is_signed = true; // Is this type signed? Assume true by default.
 
 };
 
