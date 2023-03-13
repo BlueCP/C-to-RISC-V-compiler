@@ -6,17 +6,13 @@ class Constant : public Node {
 
 public:
 
-    Constant(int n) : Node(std::to_string(n)), number(n) {
+    Constant(int n) : Node(std::to_string(n)) {
         value = n;
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO codegen put number in dest_reg.
-
-        std::cout << "li " << reg_name[dest_reg] << " " << number << std::endl;
+        std::cout << "li " << reg_name[dest_reg] << " " << value << std::endl;
     }
-
-    int number;
 
 };
 
