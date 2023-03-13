@@ -12,6 +12,8 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         // TODO codegen put number in dest_reg.
+
+        std::cout << "li " << reg_name[dest_reg] << " " << number << std::endl;
     }
 
     int number;

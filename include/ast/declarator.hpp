@@ -10,7 +10,7 @@ class Declarator : public Node {
 
 public:
 
-    Declarator(std::string i) : Node(i) {}
+    Declarator(std::string _i) : identifier(_i) {}
 
     Declarator(std::string i, bool p) : Node(i), pointer(p) {}
 
@@ -23,6 +23,7 @@ public:
         }
     }
 
+    std::string identifier;
     bool pointer;
     int size; // In bytes
 
@@ -94,14 +95,14 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         if (context.function_declarator_start) {
-            // TODO codegen function name label.
+            std::cout << identifier << ":" << std::endl;
             context.new_scope(os, identifier);
             for (int i = 0; i < parameter_list->node_list.size(); i++) {
                 parameter_list->node_list[i]->compile(os, i + 10, context);
             }
         } else {
             context.leave_scope(os);
-            // TODO codegen jump to return address.
+            std::cout << "jr ra" << std::endl;
         }
     }
 

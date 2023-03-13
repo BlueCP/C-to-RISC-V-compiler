@@ -24,6 +24,22 @@ public:
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         // TODO codegen
         // Note that if update_statement is a nullptr, then no update statement was provided.
+        auto l1 = new_label("l1");
+        auto l2 = new_label("l2");
+
+        initial_statement->compile(os, dest_reg, context);
+        std::cout << "." << l1 << ":" << std::endl;
+        condition->compile(os, dest_reg, context);
+        std::cout << "bne " << reg_name[dest_reg] << ", 0, ." << l2 << std::endl;
+
+        //body
+        body->compile(os,dest_reg,context);
+
+        if(update_statement != nullptr){
+            update_statement->compile(os, dest_reg, context);
+        }
+        std::cout << "j ." << l1 << std::endl;
+        std::cout << "." << l2 << ":" << std::endl;
         // Update context.continue_label and context.break_label.
     }
 

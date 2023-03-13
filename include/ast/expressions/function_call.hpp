@@ -20,6 +20,7 @@ public:
             arg_list->node_list[i]->compile(os, 10 + i, context); // Load argument registers
         }
         // TODO codegen call function.
+        std::cout << "call " << identifier << std::endl;
     }
 
     NodeList* arg_list;

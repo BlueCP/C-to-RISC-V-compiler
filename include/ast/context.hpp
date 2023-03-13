@@ -26,11 +26,17 @@ public:
         scope_stack.push_back(new Scope(identifier));
         // TODO codgen
         // 1. Move the stack pointer down (by STACK_FRAME_SIZE).
+        std::cout << "addi sp, sp, -" << STACK_FRAME_SIZE << std::endl;
         // 2. Push the return address to the stack.
         //   - this is redunant in most cases, but it simplifes implementation to
         //     just do it every time.
+        std::cout << "sw ra, 0(sp)" << std::endl;
+
         // 3. Push the frame pointer to the stack.
+        std::cout << "sw fp, 4(sp)" << std::endl;
+
         // 4. Move the frame pointer up (to the bottom of the previous stack frame).
+        std::cout << "addi fp, sp, " << STACK_FRAME_SIZE << std::endl; 
     }
 
     // Leave the current scope and deallocate the stack frame.
@@ -39,8 +45,11 @@ public:
         scope_stack.pop_back();
         // TODO codgen
         // 1. Load the return address from the stack.
+        std::cout << "lw ra, 0(sp)" << std::endl;
         // 2. Load the frame pointer from the stack.
+        std::cout << "lw fp, 4(sp)" << std::endl;
         // 3. Move the stack pointer up to deallocate the stack frame.
+        std::cout << "addi sp, sp, " << STACK_FRAME_SIZE << std::endl;
     }
 
     bool in_global() {
@@ -104,6 +113,7 @@ public:
     void store_reg(std::ostream& os, int reg, int fp_offset) {
         // TODO codegen
         // fp + fp_offset + array_offset_reg = address to target
+        std::cout << "sw " << reg_name[reg] <<  ", fp(" << fp_offset + array_offset_reg << ")" << std::endl;
     }
 
     // Loads a register from the stack using the given fp offset.
@@ -111,6 +121,7 @@ public:
     void load_reg(std::ostream& os, int reg, int fp_offset) {
         // TODO codegen
         // fp + fp_offset + array_offset_reg = address to target
+        std::cout << "lw " << reg_name[reg] << ", fp(" << fp_offset + array_offset_reg << ")" << std::endl;
     }
 
     std::map<std::string, int> enum_map;
