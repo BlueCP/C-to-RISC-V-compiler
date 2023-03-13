@@ -117,6 +117,8 @@ public:
     // We are assuming global scope for enums, and no differentiation based on their identifiers.
     int enum_counter = 0;
 
+    int array_size = 0;
+
     std::vector<Scope*> scope_stack;
     bool reg_available[32] = {0, 0, 0, 0, 0, 1, 1, 1,
                               1, 1, 0, 1, 1, 1, 1, 1,

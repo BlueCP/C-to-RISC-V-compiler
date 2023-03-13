@@ -3,15 +3,17 @@
 #include "node.hpp"
 #include "node_list.hpp"
 #include "declarator.hpp"
+#include "type_specifier.hpp"
 
 class FunctionDef : public Node {
 
 public:
 
-    FunctionDef(std::string _type, Declarator* _fd, NodeList* _cs)
-        : return_type(_type), declarator(_fd), compound_statement(_cs) {}
+    FunctionDef(TypeSpec* t, Declarator* d, NodeList* c)
+        : return_type(t), declarator(d), compound_statement(c) {}
 
     ~FunctionDef() {
+        delete return_type;
         delete declarator;
         delete compound_statement;
     }
@@ -28,7 +30,7 @@ public:
         declarator->compile(os, dest_reg, context); // Generate function footer
     }
 
-    std::string return_type;
+    TypeSpec* return_type;
     Declarator* declarator;
     NodeList* compound_statement;
 

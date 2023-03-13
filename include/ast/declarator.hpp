@@ -2,6 +2,7 @@
 
 #include "node.hpp"
 #include "node_list.hpp"
+#include "type_specifier.hpp"
 
 class Declarator : public Node {
 
@@ -36,14 +37,14 @@ public:
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) {
+        context.array_size = initialisers->node_list.size();
+        declarator->compile(os, dest_reg, context);
         if (context.in_global()) {
-            declarator->compile(os, dest_reg, context); // Create label in global scope
             for (int i = 0; i < initialisers->node_list.size(); i++) {
                 // TODO codegen
                 // Instance of Constant has identifier equal to the number it represents.
             }
         } else {
-            declarator->compile(os, dest_reg, context); // Prepare to add variable, allocate space in stack
             int fp_offset = context.find_fp_offset(declarator->identifier); // Get fp offset
             for (int i = 0; i < initialisers->node_list.size(); i++) {
                 initialisers->node_list[i]->compile(os, dest_reg, context);
@@ -62,13 +63,15 @@ class ArrayDeclarator : public Declarator {
 
 public:
 
-    ArrayDeclarator(std::string i, bool p, int s) : Declarator(i), size(s) {}
+    ArrayDeclarator(std::string i) : Declarator(i) {}
 
     void compile(std::ostream& os, int dest_reg, Context& context) {
-        context.new_variable(4 * size, identifier);
+        if (context.in_global()) {
+            // TODO codegen declare a new global array
+        } else {
+            context.new_variable(4 * context.array_size, identifier);
+        }
     }
-
-    int size;
 
 };
 
@@ -106,13 +109,14 @@ class ParameterDeclaration : public Node {
 
 public:
 
-    ParameterDeclaration(std::string t, Declarator* d) : type(t), declarator(d) {}
+    ParameterDeclaration(TypeSpec* t, Declarator* d) : type(t), declarator(d) {}
 
     ~ParameterDeclaration() {
+        delete type;
         delete declarator;
     }
 
-    std::string type;
+    TypeSpec* type;
     Declarator* declarator;
 
 };
