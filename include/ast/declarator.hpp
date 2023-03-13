@@ -50,6 +50,7 @@ public:
             for (int i = 0; i < initialisers->node_list.size(); i++) {
                 // TODO codegen
                 // Instance of Constant has identifier equal to the number it represents.
+                
             }
         } else {
             int fp_offset = context.find_fp_offset(identifier); // Get fp offset

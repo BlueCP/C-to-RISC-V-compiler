@@ -77,6 +77,7 @@ public:
     int get_clean_reg(std::ostream& os) {
         int reg = get_reg();
         // TODO codegen set this reg to 0.
+        std::cout << "addi, " << reg_name[reg] << ", zero, 0" << std::endl;
         return reg;
     }
 
