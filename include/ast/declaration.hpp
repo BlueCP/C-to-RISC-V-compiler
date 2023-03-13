@@ -20,6 +20,7 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         for (auto d : declarators) {
+            d->size = type->size;
             d->compile(os, dest_reg, context);
         }
         // Update this to work with more types (other than int) later.

@@ -17,44 +17,47 @@ public:
         if (context.in_global()) {
             // TODO codegen declare a new global variable
         } else {
-            context.new_variable(4, identifier);
+            context.new_variable(size, identifier);
         }
     }
 
     bool pointer;
+    int size; // In bytes
 
 };
 
-class InitDeclarator : public Node {
+class InitDeclarator : public Declarator {
 
 public:
 
-    InitDeclarator(Declarator* d, NodeList* l) : declarator(d), initialisers(l) {}
+    InitDeclarator(Declarator* d, NodeList* l) : Declarator(d->identifier), initialisers(l) {
+        pointer = d->pointer;
+        size = d->size;
+        delete d;
+    }
 
     ~InitDeclarator() {
-        delete declarator;
         delete initialisers;
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) {
         context.array_size = initialisers->node_list.size();
-        declarator->compile(os, dest_reg, context);
+        Declarator::compile(os, dest_reg, context);
         if (context.in_global()) {
             for (int i = 0; i < initialisers->node_list.size(); i++) {
                 // TODO codegen
                 // Instance of Constant has identifier equal to the number it represents.
             }
         } else {
-            int fp_offset = context.find_fp_offset(declarator->identifier); // Get fp offset
+            int fp_offset = context.find_fp_offset(identifier); // Get fp offset
             for (int i = 0; i < initialisers->node_list.size(); i++) {
                 initialisers->node_list[i]->compile(os, dest_reg, context);
-                context.store_reg(os, dest_reg, fp_offset + (4 * i));
+                context.store_reg(os, dest_reg, fp_offset + (size * i));
             }
             // If the variable is not an array, this for loop will just execute once, giving the desired behaviour.
         }
     }
 
-    Declarator* declarator;
     NodeList* initialisers;
 
 };
@@ -79,29 +82,28 @@ class FunctionDeclarator : public Declarator {
 
 public:
 
-    FunctionDeclarator(std::string i, std::vector<ParameterDeclaration*> p)
-        : Declarator(i), parameter_list(p) {}
+    FunctionDeclarator(std::string i, NodeList* p) : Declarator(i), parameter_list(p) {}
 
-    FunctionDeclarator(std::string i) : Declarator(i) {}
+    FunctionDeclarator(std::string i) : Declarator(i), parameter_list(new NodeList()) {}
 
     ~FunctionDeclarator() {
-        for (auto p : parameter_list) {
-            delete p;
-        }
+        delete parameter_list;
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         if (context.function_declarator_start) {
             // TODO codegen function name label.
             context.new_scope(os, identifier);
-            // TODO codegen push argument registers to the stack.
+            for (int i = 0; i < parameter_list->node_list.size(); i++) {
+                parameter_list->node_list[i]->compile(os, i + 10, context);
+            }
         } else {
             context.leave_scope(os);
             // TODO codegen jump to return address.
         }
     }
 
-    std::vector<ParameterDeclaration*> parameter_list;
+    NodeList* parameter_list;
 
 };
 
@@ -114,6 +116,11 @@ public:
     ~ParameterDeclaration() {
         delete type;
         delete declarator;
+    }
+
+    void compile(std::ostream& os, int dest_reg, Context& context) {
+        // TODO codegen push argument register to stack
+        // Use type to determine specific behaviour
     }
 
     TypeSpec* type;

@@ -23,8 +23,6 @@
   std::vector<Declarator*> declarator_list;
   InitDeclarator* init_declarator;
   std::vector<InitDeclarator*> init_declarator_list;
-  ParameterDeclaration* parameter;
-  std::vector<ParameterDeclaration*>* parameter_list;
   TypeSpec* type_spec;
 }
 
@@ -66,16 +64,13 @@ The following statements are invalid and are left only to keep track of what the
 // Statements
 %type <node> expression_statement iteration_statement selection_statement labeled_statement statement jump_statement
 // Other stuff
-%type <node> declaration enumerator
+%type <node> declaration enumerator parameter_declaration
 // Node lists
 %type <node_list> compound_statement statement_list declaration_list translation_unit argument_expression_list
-%type <node_list> initializer initializer_list enumerator_list
+%type <node_list> initializer initializer_list enumerator_list parameter_list parameter_type_list
 
 %type <declarator> declarator direct_declarator init_declarator
 %type <declarator_list> init_declarator_list
-
-%type <parameter> parameter_declaration
-%type <parameter_list> parameter_list parameter_type_list
 
 %type <type_spec> enum_specifier type_specifier declaration_specifiers
 
@@ -274,6 +269,7 @@ declaration
   ;
 
 // For now, assume that a declaration specifier can only contain one type.
+// e.g. no signed char
 declaration_specifiers
   : storage_class_specifier
   | storage_class_specifier declaration_specifiers
@@ -308,16 +304,18 @@ storage_class_specifier
   | REGISTER
   ;
 
+// Only implement void, char, int, float, double, unsigned, struct, enum.
+// This defines the type for functions, parameters (of functions), and declarations.
 type_specifier
-  : VOID { $$ = new TypeSpec("void", 0); }
-  | CHAR
+  : VOID { $$ = new TypeSpec("void"); }
+  | CHAR { $$ = new TypeSpec("char"); }
   | SHORT
-  | INT { $$ = new TypeSpec("int", 4); }
+  | INT { $$ = new TypeSpec("int"); }
   | LONG
-  | FLOAT
-  | DOUBLE
+  | FLOAT { $$ = new TypeSpec("float"); }
+  | DOUBLE { $$ = new TypeSpec("double"); }
   | SIGNED
-  | UNSIGNED
+  | UNSIGNED { $$ = new TypeSpec("unsigned"); }
   | struct_or_union_specifier
   | enum_specifier { $$ = $1; }
   | TYPE_NAME
@@ -384,7 +382,7 @@ type_qualifier
   ;
 
 declarator
-  : pointer direct_declarator { $$ = $2; $$->pointer = true; }
+  : pointer direct_declarator { $$ = $2; $$->pointer = true; delete $1; }
   | direct_declarator { $$ = $1; $$->pointer = false; }
   ;
 
@@ -393,7 +391,7 @@ direct_declarator
   | '(' declarator ')' { $$ = $2; }
   | direct_declarator '[' constant_expression ']' { $$ = new ArrayDeclarator($1->identifier); delete $1; }
   | direct_declarator '[' ']' { $$ = new ArrayDeclarator($1->identifier); delete $1; }
-  | direct_declarator '(' parameter_type_list ')' { $$ = new FunctionDeclarator($1->identifier, *$3); delete $1; delete $3; }
+  | direct_declarator '(' parameter_type_list ')' { $$ = new FunctionDeclarator($1->identifier, $3); delete $1; }
   | direct_declarator '(' identifier_list ')' // Do not implement K&R-style function declarations.
   | direct_declarator '(' ')' { $$ = new FunctionDeclarator($1->identifier); delete $1; }
   ;
@@ -417,14 +415,8 @@ parameter_type_list
   ;
 
 parameter_list
-  : parameter_declaration {
-    $$ = new std::vector<ParameterDeclaration*>();
-    $$->push_back($1);
-  }
-  | parameter_list ',' parameter_declaration {
-    $$ = $1;
-    $$->push_back($3);
-  }
+  : parameter_declaration { $$ = new NodeList($1); }
+  | parameter_list ',' parameter_declaration { $$ = $1; $$->add_node($3); }
   ;
 
 parameter_declaration
