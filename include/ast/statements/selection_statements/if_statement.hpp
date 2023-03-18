@@ -14,7 +14,6 @@ public:
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO codegen
         auto l1 = new_label("l1");
         statement->compile(os,dest_reg,context);
         std::cout << "bne " << reg_name[dest_reg]  << ", 0, ." << l1 << std::endl;

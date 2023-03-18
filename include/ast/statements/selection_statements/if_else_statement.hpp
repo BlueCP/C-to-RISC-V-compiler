@@ -15,7 +15,6 @@ public:
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO codegen
         auto l1 = new_label("l1");
         auto l2 = new_label("l2");
 

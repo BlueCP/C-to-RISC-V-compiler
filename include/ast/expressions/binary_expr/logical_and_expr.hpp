@@ -12,7 +12,6 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         auto [reg1, reg2] = eval(os, context);
-        // TODO codegen
 
         std::string l2 = new_label("l2");
         std::string l3 = new_label("l3");

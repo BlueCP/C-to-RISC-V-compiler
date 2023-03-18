@@ -27,7 +27,6 @@ public:
     // Enter a new scope and create a stack frame.
     void new_scope(std::ostream& os, std::string identifier) {
         scope_stack.push_back(new Scope(identifier));
-        // TODO codgen
         // 1. Move the stack pointer down (by STACK_FRAME_SIZE).
         std::cout << "addi sp, sp, -" << STACK_FRAME_SIZE << std::endl;
         // 2. Push the return address to the stack.
@@ -46,7 +45,6 @@ public:
     void leave_scope(std::ostream& os) {
         delete scope_stack.back();
         scope_stack.pop_back();
-        // TODO codgen
         // 1. Load the return address from the stack.
         std::cout << "lw ra, 0(sp)" << std::endl;
         // 2. Load the frame pointer from the stack.
@@ -114,7 +112,6 @@ public:
     // Stores a register in the stack using the given fp offset.
     // Used for both initialising (with new_variable) and reassigning (with find_fp_offset).
     void store_reg(std::ostream& os, int reg, int fp_offset) {
-        // TODO codegen
         // fp + fp_offset + array_offset_reg = address to target
         std::cout << "sw " << reg_name[reg] <<  ", fp(" << fp_offset + array_offset_reg << ")" << std::endl;
     }
@@ -122,7 +119,6 @@ public:
     // Loads a register from the stack using the given fp offset.
     // Used together with find_fp_offset.
     void load_reg(std::ostream& os, int reg, int fp_offset) {
-        // TODO codegen
         // fp + fp_offset + array_offset_reg = address to target
         std::cout << "lw " << reg_name[reg] << ", fp(" << fp_offset + array_offset_reg << ")" << std::endl;
     }

@@ -14,7 +14,6 @@ public:
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // TODO codegen
         std::string l1 = new_label("l1");
         std::string l2 = new_label("l2");
         std::cout << "." << l1 << ":" << std::endl;        
