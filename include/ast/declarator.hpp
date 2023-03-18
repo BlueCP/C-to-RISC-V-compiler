@@ -18,6 +18,9 @@ public:
     void compile(std::ostream& os, int dest_reg, Context& context) {
         if (context.in_global()) {
             // TODO codegen declare a new global variable
+            auto l1 = new_label(identifier);
+            std::cout << l1 << ":" << std::endl;
+            std::cout << ".zero " << size << std::endl;
         } else {
             context.new_variable(size, identifier);
         }
@@ -50,7 +53,7 @@ public:
             for (int i = 0; i < initialisers->node_list.size(); i++) {
                 // TODO codegen
                 // Instance of Constant has identifier equal to the number it represents.
-                
+                initialisers->node_list[i]->compile(os, dest_reg,context);
             }
         } else {
             int fp_offset = context.find_fp_offset(identifier); // Get fp offset
@@ -75,6 +78,11 @@ public:
     void compile(std::ostream& os, int dest_reg, Context& context) {
         if (context.in_global()) {
             // TODO codegen declare a new global array
+            auto l1 = new_label(identifier);
+            std::cout << l1 << ":" << std::endl;
+            std::cout << ".zero " << size << std::endl;
+
+
         } else {
             context.new_variable(size * context.array_size, identifier);
         }
@@ -125,6 +133,9 @@ public:
     void compile(std::ostream& os, int dest_reg, Context& context) {
         // TODO codegen push argument register to stack
         // Use type to determine specific behaviour
+        std::cout << "sw " << reg_name[dest_reg] << "0(sp)" << std::endl;
+        std::cout << "addi sp, sp, " << type->size << std::endl;
+        
     }
 
     TypeSpec* type;

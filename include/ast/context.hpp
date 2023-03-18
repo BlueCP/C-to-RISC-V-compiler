@@ -39,7 +39,8 @@ public:
         std::cout << "sw fp, 4(sp)" << std::endl;
 
         // 4. Move the frame pointer up (to the bottom of the previous stack frame).
-        std::cout << "addi fp, sp, " << STACK_FRAME_SIZE << std::endl; 
+        std::cout << "addi fp, sp, " << STACK_FRAME_SIZE << std::endl;
+        std::cout << "addi sp, sp, 8" << std::endl; 
     }
 
     // Leave the current scope and deallocate the stack frame.
