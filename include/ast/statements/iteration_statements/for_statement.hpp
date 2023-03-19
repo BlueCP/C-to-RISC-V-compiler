@@ -25,6 +25,8 @@ public:
         // Note that if update_statement is a nullptr, then no update statement was provided.
         auto l1 = new_label("l1");
         auto l2 = new_label("l2");
+        context.continue_label = l1;
+        context.break_label = l2;
 
         initial_statement->compile(os, dest_reg, context);
         std::cout << "." << l1 << ":" << std::endl;

@@ -14,6 +14,12 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) {
         // TODO codegen execute statement if context.switch_cascade_reg is 0.
+        auto l1 = new_label("l1");
+
+        std::cout << "bne " << reg_name[context.switch_cascade_reg] << ", 0, ." << l1 << std::endl;
+        statement->compile(os, dest_reg, context);
+        std::cout << "." << l1 << ":" << std::endl;
+         
     }
 
     Node* statement;
