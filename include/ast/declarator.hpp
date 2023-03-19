@@ -18,8 +18,7 @@ public:
     void compile(std::ostream& os, int dest_reg, Context& context) {
         if (context.in_global()) {
             // TODO codegen declare a new global variable
-            auto l1 = new_label(identifier);
-            std::cout << l1 << ":" << std::endl;
+            std::cout << identifier << ":" << std::endl;
             std::cout << ".zero " << size << std::endl;
         } else {
             context.new_variable(size, identifier);
