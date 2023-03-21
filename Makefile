@@ -17,7 +17,7 @@ src/lexer.yy.c : src/lexer.flex src/parser.tab.cpp
 	flex -o src/lexer.yy.c src/lexer.flex
 
 src/parser.tab.cpp : src/parser.y
-	yacc -v src/parser.y -o src/parser.tab.cpp
+	bison -v -d src/parser.y -o src/parser.tab.cpp
 
 bin/c_compiler : src/cli.cpp src/compiler.cpp
 	@mkdir -p bin

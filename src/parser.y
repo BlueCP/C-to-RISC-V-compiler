@@ -492,7 +492,7 @@ compound_statement
   ;
 
 declaration_list
-  : declaration { $$ = new StatementList($2); }
+  : declaration { $$ = new StatementList($1); }
   | declaration_list declaration { $$ = $1; $$->add_node($2); }
   ;
 
