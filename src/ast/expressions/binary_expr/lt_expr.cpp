@@ -1,0 +1,14 @@
+#include "ast/expressions/binary_expr/lt_expr.hpp"
+
+LtExpr::LtExpr(Node* l, Node* r) : BinaryOp(l, r) {
+    value = l->value < r->value;
+}
+
+void LtExpr::compile(std::ostream& os, int dest_reg, Context& context) const {
+    auto [reg1, reg2] = eval(os, context);
+    os << "slt " << reg_name[reg1] << ", " << reg_name[reg1] << ", " << reg_name[reg2] << std::endl;
+    os << "andi " << reg_name[reg1] << ", " << reg_name[reg1] << ", 0xff" << std::endl;
+    os << "mv " << reg_name[dest_reg] << ", " << reg_name[reg1] << std::endl;
+
+    free(reg1, reg2, context);
+}
