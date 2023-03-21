@@ -38,7 +38,8 @@ public:
         std::cout << "sw fp, 4(sp)" << std::endl;
 
         // 4. Move the frame pointer up (to the bottom of the previous stack frame).
-        std::cout << "addi fp, sp, " << STACK_FRAME_SIZE << std::endl; 
+        std::cout << "addi fp, sp, " << STACK_FRAME_SIZE << std::endl;
+        std::cout << "addi sp, sp, 8" << std::endl; 
     }
 
     // Leave the current scope and deallocate the stack frame.
@@ -75,6 +76,7 @@ public:
     int get_clean_reg(std::ostream& os) {
         int reg = get_reg();
         // TODO codegen set this reg to 0.
+        std::cout << "addi, " << reg_name[reg] << ", zero, 0" << std::endl;
         return reg;
     }
 
