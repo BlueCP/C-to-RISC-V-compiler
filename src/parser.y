@@ -64,7 +64,7 @@ The following statements are invalid and are left only to keep track of what the
 // Statements
 %type <node> expression_statement iteration_statement selection_statement labeled_statement statement jump_statement
 // Other stuff
-%type <node> declaration enumerator parameter_declaration
+%type <node> declaration enumerator parameter_declaration root
 // Node lists
 %type <node_list> compound_statement statement_list declaration_list translation_unit argument_expression_list
 %type <node_list> initializer initializer_list enumerator_list parameter_list parameter_type_list
@@ -74,9 +74,11 @@ The following statements are invalid and are left only to keep track of what the
 
 %type <type_spec> enum_specifier type_specifier declaration_specifiers
 
-%start translation_unit
+%start root
 
 %%
+
+root : translation_unit { g_root = $$; }
 
 primary_expression
   : IDENTIFIER { $$ = new Identifier(*$1); delete $1; }
