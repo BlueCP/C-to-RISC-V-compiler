@@ -6,27 +6,15 @@ class NodeList : public Node {
 
 public:
 
-    NodeList(Node* node) {
-        node_list.push_back(node);
-    }
+    NodeList(Node* node);
 
-    NodeList() {}
+    NodeList();
 
-    ~NodeList() {
-        for (auto n : node_list) {
-            delete n;
-        }
-    }
+    ~NodeList();
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        for (auto node : node_list) {
-            node->compile(os, dest_reg, context);
-        }
-    }
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
 
-    void add_node(Node* node) {
-        node_list.push_back(node);
-    }
+    void add_node(Node* node);
 
     std::vector<Node*> node_list;
 
@@ -38,20 +26,10 @@ class StatementList : public NodeList {
 
 public:
 
-    StatementList(Node* node) {
-        node_list.push_back(node);
-    }
+    StatementList(Node* node);
 
-    StatementList() {}
+    StatementList();
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        for (auto node : node_list) {
-            node->compile(os, dest_reg, context);
-            if (context.return_flag) {
-                context.return_flag = false; // Reset flag
-                break; // Terminate early on return
-            }
-        }
-    }
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
 
 };

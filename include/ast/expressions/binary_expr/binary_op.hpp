@@ -6,25 +6,13 @@ class BinaryOp : public Node {
 
 public:
 
-    BinaryOp(Node* l, Node* r) : left(l), right(r) {}
+    BinaryOp(Node* l, Node* r);
 
-    ~BinaryOp() {
-        delete left;
-        delete right;
-    }
+    ~BinaryOp();
 
-    auto eval(std::ostream& os, Context& context) const {
-        int reg1 = context.get_reg();
-        int reg2 = context.get_reg();
-        left->compile(os, reg1, context);
-        right->compile(os, reg2, context);
-        return RegPair {reg1, reg2};
-    }
+    auto eval(std::ostream& os, Context& context) const;
 
-    void free(int reg1, int reg2, Context& context) const {
-        context.free_reg(reg1);
-        context.free_reg(reg2);
-    }
+    void free(int reg1, int reg2, Context& context) const;
 
     Node* left;
     Node* right;

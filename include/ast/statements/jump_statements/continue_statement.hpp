@@ -6,11 +6,8 @@ class ContinueStatement : public Node {
 
 public:
 
-    ContinueStatement() {}
+    ContinueStatement();
 
-    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
-        // TODO codegen jump to context.continue_label.
-        os << "j ." << context.continue_label << std::endl;
-    }
+    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const;
 
 };

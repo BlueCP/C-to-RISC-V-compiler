@@ -12,6 +12,4 @@ static std::string reg_name[32] = {
 static int label_tracker = 0;
 
 // Create a unique label.
-std::string new_label(std::string base) {
-    return base + std::to_string(label_tracker++);
-}
+std::string new_label(std::string base);

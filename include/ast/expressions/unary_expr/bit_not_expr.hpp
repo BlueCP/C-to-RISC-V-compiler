@@ -6,13 +6,8 @@ class BitNotExpr : public UnaryOp {
 
 public:
 
-    BitNotExpr(Node* e) : UnaryOp(e) {
-        value = ~e->value;
-    }
+    BitNotExpr(Node* e);
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        expr->compile(os, dest_reg, context);
-        os << "not " << reg_name[dest_reg] << ", " << reg_name[dest_reg] << std::endl;
-    }
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
 
 };

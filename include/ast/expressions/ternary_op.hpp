@@ -10,6 +10,6 @@ class TernaryOp : public IfElseStatement {
 
 public:
 
-    TernaryOp(Node* c, Node* i, Node* e) : IfElseStatement(c, i, e) {}
+    TernaryOp(Node* c, Node* i, Node* e);
 
 };

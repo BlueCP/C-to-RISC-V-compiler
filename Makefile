@@ -1,3 +1,5 @@
+# Makefile taken from https://github.com/simon-staal/Odyssey_C_Compiler/blob/master/Makefile.
+
 LINK_TARGET = bin/c_compiler
 CC = g++
 

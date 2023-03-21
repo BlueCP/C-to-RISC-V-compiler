@@ -6,20 +6,11 @@ class IfStatement : public Node {
 
 public:
 
-    IfStatement(Node* c, Node* s) : condition(c), statement(s) {}
+    IfStatement(Node* c, Node* s);
 
-    ~IfStatement() {
-        delete condition;
-        delete statement;
-    }
+    ~IfStatement();
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        auto l1 = new_label("l1");
-        statement->compile(os,dest_reg,context);
-        os << "bne " << reg_name[dest_reg]  << ", 0, ." << l1 << std::endl;
-        condition->compile(os, dest_reg, context);
-        os << "." << l1 << ":" << std::endl;
-    }
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
 
     Node* condition;
     Node* statement;

@@ -6,14 +6,8 @@ class AndExpr : public BinaryOp {
 
 public:
 
-    AndExpr(Node* l, Node* r) : BinaryOp(l, r) {
-        value = l->value & r->value;
-    }
+    AndExpr(Node* l, Node* r);
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        auto [reg1, reg2] = eval(os, context);
-        os << "and " << reg_name[dest_reg] << ", " << reg_name[reg1] <<  ", " << reg_name[reg2] << std::endl;
-        free(reg1, reg2, context);
-    }
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
 
 };

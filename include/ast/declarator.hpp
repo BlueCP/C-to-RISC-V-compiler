@@ -10,23 +10,14 @@ class Declarator : public Node {
 
 public:
 
-    Declarator(std::string i) : identifier(i) {}
+    Declarator(std::string i);
 
-    Declarator(std::string i, bool p) : Node(i), pointer(p) {}
+    Declarator(std::string i, bool p);
 
-    virtual ~Declarator() {}
+    virtual ~Declarator();
 
     // By default, Declarator declares a single variable.
-    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
-        // Declarator::compile does not depend on dest_reg since it does not deal with 'values'.
-        if (context.in_global()) {
-            // TODO codegen declare a new global variable
-            os << identifier << ":" << std::endl;
-            os << ".zero " << size << std::endl;
-        } else {
-            context.new_variable(size, identifier);
-        }
-    }
+    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const;
 
     std::string identifier;
     bool pointer;
@@ -38,11 +29,11 @@ class BasicDeclarator : public Declarator {
 
 public:
 
-    BasicDeclarator(std::string i) : Declarator(i) {}
+    BasicDeclarator(std::string i);
 
-    BasicDeclarator(std::string i, bool p) : Declarator(i, p) {}
+    BasicDeclarator(std::string i, bool p);
 
-    ~BasicDeclarator() {} // Nothing to delete.
+    ~BasicDeclarator();
 
 };
 
@@ -50,34 +41,11 @@ class InitDeclarator : public Declarator {
 
 public:
 
-    InitDeclarator(Declarator* d, NodeList* l) : Declarator(d->identifier), initialisers(l) {
-        pointer = d->pointer;
-        size = d->size;
-        delete d;
-    }
+    InitDeclarator(Declarator* d, NodeList* l);
 
-    ~InitDeclarator() {
-        delete initialisers;
-    }
+    ~InitDeclarator();
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        context.array_size = initialisers->node_list.size();
-        Declarator::compile(os, dest_reg, context);
-        if (context.in_global()) {
-            for (unsigned i = 0; i < initialisers->node_list.size(); i++) {
-                // TODO codegen
-                // Instance of Constant has identifier equal to the number it represents.
-                initialisers->node_list[i]->compile(os, dest_reg,context);
-            }
-        } else {
-            int fp_offset = context.find_fp_offset(identifier); // Get fp offset
-            for (unsigned i = 0; i < initialisers->node_list.size(); i++) {
-                initialisers->node_list[i]->compile(os, dest_reg, context);
-                context.store_reg(os, dest_reg, fp_offset + (size * i));
-            }
-            // If the variable is not an array, this for loop will just execute once, giving the desired behaviour.
-        }
-    }
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
 
     NodeList* initialisers;
 
@@ -87,20 +55,9 @@ class ArrayDeclarator : public Declarator {
 
 public:
 
-    ArrayDeclarator(std::string i) : Declarator(i) {}
+    ArrayDeclarator(std::string i);
 
-    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
-        if (context.in_global()) {
-            // TODO codegen declare a new global array
-            auto l1 = new_label(identifier);
-            os << l1 << ":" << std::endl;
-            os << ".zero " << size << std::endl;
-
-
-        } else {
-            context.new_variable(size * context.array_size, identifier);
-        }
-    }
+    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const;
 
 };
 
@@ -108,26 +65,13 @@ class FunctionDeclarator : public Declarator {
 
 public:
 
-    FunctionDeclarator(std::string i, NodeList* p) : Declarator(i), parameter_list(p) {}
+    FunctionDeclarator(std::string i, NodeList* p);
 
-    FunctionDeclarator(std::string i) : Declarator(i), parameter_list(new NodeList()) {}
+    FunctionDeclarator(std::string i);
 
-    ~FunctionDeclarator() {
-        delete parameter_list;
-    }
+    ~FunctionDeclarator();
 
-    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
-        if (context.function_declarator_start) {
-            os << identifier << ":" << std::endl;
-            context.new_scope(os, identifier);
-            for (unsigned i = 0; i < parameter_list->node_list.size(); i++) {
-                parameter_list->node_list[i]->compile(os, i + 10, context);
-            }
-        } else {
-            context.leave_scope(os);
-            os << "jr ra" << std::endl;
-        }
-    }
+    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const;
 
     NodeList* parameter_list;
 
@@ -137,18 +81,11 @@ class ParameterDeclaration : public Node {
 
 public:
 
-    ParameterDeclaration(TypeSpec* t, Declarator* d) : type(t), declarator(d) {}
+    ParameterDeclaration(TypeSpec* t, Declarator* d);
 
-    ~ParameterDeclaration() {
-        delete type;
-        delete declarator;
-    }
+    ~ParameterDeclaration();
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        declarator->compile(os, dest_reg, context);
-        int fp_offset = context.find_fp_offset(identifier);
-        context.store_reg(os, dest_reg, fp_offset);
-    }
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
 
     TypeSpec* type;
     Declarator* declarator;

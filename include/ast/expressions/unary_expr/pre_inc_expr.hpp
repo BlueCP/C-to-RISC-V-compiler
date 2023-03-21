@@ -9,18 +9,11 @@ class PreIncExpr : public UnaryOp {
 
 public:
 
-    PreIncExpr(Node* e) : UnaryOp(e) {
-        value = e->value + 1;
-        inc_expr = new AssignmentExpr(e, new AddExpr(e, new Constant(1)));
-    }
+    PreIncExpr(Node* e);
 
-    ~PreIncExpr() {
-        delete inc_expr;
-    }
+    ~PreIncExpr();
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        inc_expr->compile(os, dest_reg, context);
-    }
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
 
     Node* inc_expr;
 

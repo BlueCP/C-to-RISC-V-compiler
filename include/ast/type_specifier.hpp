@@ -7,11 +7,11 @@ class TypeSpec : public Node {
 
 public:
 
-    TypeSpec() {}
+    TypeSpec();
 
-    TypeSpec(std::string i) : Node(i) {}
+    TypeSpec(std::string i);
 
-    virtual ~TypeSpec() {}
+    virtual ~TypeSpec();
 
     int size; // In bytes
     bool is_signed = true; // Is this type signed? Assume true by default.
@@ -22,31 +22,11 @@ class PrimType : public TypeSpec {
 
 public:
 
-    PrimType(std::string i) : TypeSpec(i) {
-        if (i == "void") {
-            size = 0;
-        } else if (i == "char") {
-            size = 1;
-            is_signed = false;
-        } else if (i == "int") {
-            size = 4;
-        } else if (i == "float") {
-            size = 4;
-        } else if (i == "double") {
-            size = 8;
-        } else if (i == "unsigned") {
-            size = 4;
-            is_signed = false;
-        }
-    }
+    PrimType(std::string i);
 
-    ~PrimType() {
-        // Nothing to delete.
-    }
+    ~PrimType();
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // Don't generate any assembly.
-    }
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
 
 };
 
@@ -55,15 +35,11 @@ class EnumType : public TypeSpec {
 
 public:
 
-    EnumType(std::string i) : TypeSpec(i) {}
+    EnumType(std::string i);
 
-    ~EnumType() {
-        // Nothing to delete.
-    }
+    ~EnumType();
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // Don't generate any assembly.
-    }
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
 
 };
 
@@ -72,18 +48,13 @@ class EnumSpecifier : public TypeSpec {
 
 public:
 
-    EnumSpecifier(NodeList* l) : TypeSpec(""), enum_list(l) {}
+    EnumSpecifier(NodeList* l);
 
-    EnumSpecifier(std::string i, NodeList* l) : TypeSpec(i), enum_list(l) {}
+    EnumSpecifier(std::string i, NodeList* l);
 
-    ~EnumSpecifier() {
-        delete enum_list;
-    }
+    ~EnumSpecifier();
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        context.enum_counter = 0;
-        enum_list->compile(os, dest_reg, context);
-    }
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
 
     NodeList* enum_list;
 

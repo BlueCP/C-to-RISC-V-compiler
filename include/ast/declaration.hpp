@@ -8,22 +8,11 @@ class Declaration : public Node {
 
 public:
 
-    Declaration(TypeSpec* t, std::vector<Declarator*> d)
-        : type(t), declarators(d) {}
+    Declaration(TypeSpec* t, std::vector<Declarator*> d);
 
-    ~Declaration() {
-        delete type;
-        for (auto d : declarators) {
-            delete d;
-        }
-    }
+    ~Declaration();
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        for (auto d : declarators) {
-            d->size = type->size;
-            d->compile(os, dest_reg, context);
-        }
-    }
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
 
     TypeSpec* type;
     std::vector<Declarator*> declarators;

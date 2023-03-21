@@ -6,11 +6,9 @@ class UnaryOp : public Node {
 
 public:
 
-    UnaryOp(Node* e) : expr(e) {}
+    UnaryOp(Node* e);
 
-    ~UnaryOp() {
-        delete expr;
-    }
+    ~UnaryOp();
 
     Node* expr;
 

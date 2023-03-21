@@ -6,22 +6,13 @@ class ReturnStatement : public Node {
 
 public:
 
-    ReturnStatement(Node* _e) : expression(_e) {}
+    ReturnStatement(Node* _e);
 
-    ReturnStatement() : expression(nullptr) {}
+    ReturnStatement();
 
-    ~ReturnStatement() {
-        if (expression != nullptr) {
-            delete expression;
-        }
-    }
+    ~ReturnStatement();
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        if (expression != nullptr) {
-            expression->compile(os, dest_reg, context);
-        }
-        context.return_flag = true;
-    }
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
 
     Node* expression;
 

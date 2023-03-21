@@ -9,18 +9,11 @@ class PreDecExpr : public UnaryOp {
 
 public:
 
-    PreDecExpr(Node* e) : UnaryOp(e) {
-        value = e->value - 1;
-        dec_expr = new AssignmentExpr(e, new SubExpr(e, new Constant(1)));
-    }
+    PreDecExpr(Node* e);
 
-    ~PreDecExpr() {
-        delete dec_expr;
-    }
+    ~PreDecExpr();
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        dec_expr->compile(os, dest_reg, context);
-    }
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
 
     Node* dec_expr;
 
