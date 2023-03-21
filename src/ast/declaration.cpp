@@ -11,6 +11,7 @@ Declaration::~Declaration() {
 }
 
 void Declaration::compile(std::ostream& os, int dest_reg, Context& context) const {
+    context.function_def = false;
     for (auto d : declarators) {
         d->size = type->size;
         d->compile(os, dest_reg, context);

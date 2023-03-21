@@ -52,6 +52,12 @@ void Context::new_scope(std::ostream& os, std::string identifier) {
     // 3. Push the frame pointer to the stack.
     os << "sw fp, 4(sp)" << std::endl;
 
+    // Push all saved registers to the stack.
+    os << "sw s1, 8(sp)" << std::endl;
+    for (int i = 0; i < 10; i++) {
+        os << "sw s" << i + 2 << ", " << 12 + (4*i) << "(sp)" << std::endl;
+    }
+
     // 4. Move the frame pointer up (to the bottom of the previous stack frame).
     os << "addi fp, sp, " << STACK_FRAME_SIZE << std::endl;
     // os << "addi sp, sp, 8" << std::endl;
@@ -65,7 +71,12 @@ void Context::leave_scope(std::ostream& os) {
     os << "lw ra, 0(sp)" << std::endl;
     // 2. Load the frame pointer from the stack.
     os << "lw fp, 4(sp)" << std::endl;
-    // 3. Move the stack pointer up to deallocate the stack frame.
+    // 3. Pop all saved registers from the stack.
+    os << "lw s1, 8(sp)" << std::endl;
+    for (int i = 0; i < 10; i++) {
+        os << "lw s" << i + 2 << ", " << 12 + (4*i) << "(sp)" << std::endl;
+    }
+    // 4. Move the stack pointer up to deallocate the stack frame.
     os << "addi sp, sp, " << STACK_FRAME_SIZE << std::endl;
 }
 
@@ -91,7 +102,7 @@ int Context::get_reg() {
 int Context::get_clean_reg(std::ostream& os) {
     int reg = get_reg();
     // TODO codegen set this reg to 0.
-    os << "addi, " << reg_name[reg] << ", zero, 0" << std::endl;
+    os << "addi " << reg_name[reg] << ", zero, 0" << std::endl;
     return reg;
 }
 

@@ -17,12 +17,16 @@ void FunctionDef::compile(std::ostream& os, int dest_reg, Context& context) cons
 
     os << ".globl " << declarator->identifier << std::endl;
 
+    context.function_def = true;
     declarator->compile(os, dest_reg, context); // Generate function header
+
+    context.function_def = false;
     compound_statement->compile(os, dest_reg, context); // Generate function body
 
     context.function_declarator_start = false;
 
     os << "." << func_end_label << ":" << std::endl;
 
+    context.function_def = true;
     declarator->compile(os, dest_reg, context); // Generate function footer
 }

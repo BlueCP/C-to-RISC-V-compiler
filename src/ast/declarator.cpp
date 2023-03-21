@@ -85,15 +85,19 @@ FunctionDeclarator::~FunctionDeclarator() {
 }
 
 void FunctionDeclarator::compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
-    if (context.function_declarator_start) {
-        os << identifier << ":" << std::endl;
-        context.new_scope(os, identifier);
-        for (unsigned i = 0; i < parameter_list->node_list.size(); i++) {
-            parameter_list->node_list[i]->compile(os, i + 10, context);
+    if (context.function_def) {
+        if (context.function_declarator_start) {
+            os << identifier << ":" << std::endl;
+            context.new_scope(os, identifier);
+            for (unsigned i = 0; i < parameter_list->node_list.size(); i++) {
+                parameter_list->node_list[i]->compile(os, i + 10, context);
+            }
+        } else {
+            context.leave_scope(os);
+            os << "jr ra" << std::endl;
         }
     } else {
-        context.leave_scope(os);
-        os << "jr ra" << std::endl;
+        os << ".globl " << identifier << std::endl;
     }
 }
 

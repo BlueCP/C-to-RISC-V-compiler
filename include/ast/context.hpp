@@ -96,10 +96,10 @@ public:
 
     std::vector<Scope*> scope_stack;
     bool reg_available[32] = {0, 0, 0, 0, 0, 1, 1, 1,
-                              1, 1, 0, 1, 1, 1, 1, 1,
+                              0, 1, 0, 1, 1, 1, 1, 1,
                               1, 1, 1, 1, 1, 1, 1, 1,
                               1, 1, 1, 1, 1, 1, 1, 1};
-        // Aside from first 5 registers, mark a0 (return value register) as unavailable just in case.
+        // Aside from first 5 registers, mark a0 and fp as unavailable.
 
     bool function_declarator_start = true; // Are we are the header or footer of a function definition?
     bool return_flag = false; // Have we just reached a return statement, thus ending the compilation of statements prematurely?
@@ -109,5 +109,6 @@ public:
     std::string break_label;
     int switch_cascade_reg = 0;
     std::string func_end_label;
+    bool function_def = false; // Whether or not we are currently defining (as opposed to declaring) a function.
 
 };
