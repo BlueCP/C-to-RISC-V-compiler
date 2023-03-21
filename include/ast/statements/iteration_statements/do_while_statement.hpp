@@ -19,15 +19,15 @@ public:
         context.continue_label = l1;
         context.break_label = l2;
 
-        std::cout << "." << l1 << ":" << std::endl;        
+        os << "." << l1 << ":" << std::endl;
         statement->compile(os, dest_reg, context);
         condition->compile(os, dest_reg, context);
-        std::cout << "bne " << reg_name[dest_reg] << ", 0, ." << l1 << std::endl;
+        os << "bne " << reg_name[dest_reg] << ", 0, ." << l1 << std::endl;
         // Update context.continue_label and context.break_label.
-        std::cout << "." << l2 << ":" << std::endl;
+        os << "." << l2 << ":" << std::endl;
     }
 
-    Node* condition;
     Node* statement;
+    Node* condition;
 
 };

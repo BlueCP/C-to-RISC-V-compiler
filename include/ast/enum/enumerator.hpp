@@ -6,7 +6,7 @@ class Enumerator : public Node {
 
 public:
 
-    Enumerator(std::string i) : Node(identifier), expr(nullptr) {}
+    Enumerator(std::string i) : Node(i), expr(nullptr) {}
 
     Enumerator(std::string i, Node* v) : Node(i), expr(v) {}
 
@@ -14,7 +14,9 @@ public:
         delete expr;
     }
 
-    void compile(std::ostream& os, int dest_reg, Context& context) {
+    void compile(__attribute__((__unused__)) std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) {
+        // Note that an enum declaration does not directly produce any assembly,
+        // all logic is handled by the compiler at compile-time.
         if (expr == nullptr) {
             context.enum_map[identifier] = context.enum_counter;
         } else {

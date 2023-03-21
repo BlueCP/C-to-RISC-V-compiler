@@ -38,3 +38,9 @@ Roshan:
 - This week, we have one coursework deadline and a lab containing a significant amount of work, so it is unlikely we will be able to put as much time into the compiler.
 - However, based on the fast progress with the AST classes so far, having written all classes needed for the intermediate features, I can start work on the advanced features.
 - I also expect to have to modify some of my classes based on feedback from Corey. Although I have tried to make my AST classes as compatible as possible with codegen, I have not actually implemented codegen so there are inevitably going to be things I did not foresee.
+
+## W/C 20/3/23
+
+Roshan:
+- The coursework for other modules has taken more time than expected to complete. Therefore, the current aim is to get all basic and most intermediate features working only.
+- I expect this week will primarily be dedicated to fixing bugs with my code and trying to increase the number of testcases passed.

@@ -19,14 +19,14 @@ public:
         auto l2 = new_label("l2");
 
         condition->compile(os, dest_reg, context);
-        std::cout << "beq " << reg_name[dest_reg] << ", 0, ." << l1 << std::endl;
-        
-        else_stat->compile(os, dest_reg, context);
-        std::cout << "j ." << l2 << std::endl;
+        os << "beq " << reg_name[dest_reg] << ", 0, ." << l1 << std::endl;
 
-        std::cout << "." << l1 << ":" << std::endl;
+        else_stat->compile(os, dest_reg, context);
+        os << "j ." << l2 << std::endl;
+
+        os << "." << l1 << ":" << std::endl;
         if_stat->compile(os, dest_reg, context);
-        std::cout << "." << l2 << ":" << std::endl;
+        os << "." << l2 << ":" << std::endl;
     }
 
     Node* condition;

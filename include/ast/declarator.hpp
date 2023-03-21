@@ -14,12 +14,15 @@ public:
 
     Declarator(std::string i, bool p) : Node(i), pointer(p) {}
 
+    virtual ~Declarator() = 0;
+
     // By default, Declarator declares a single variable.
-    void compile(std::ostream& os, int dest_reg, Context& context) {
+    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) {
+        // Declarator::compile does not depend on dest_reg since it does not deal with 'values'.
         if (context.in_global()) {
             // TODO codegen declare a new global variable
-            std::cout << identifier << ":" << std::endl;
-            std::cout << ".zero " << size << std::endl;
+            os << identifier << ":" << std::endl;
+            os << ".zero " << size << std::endl;
         } else {
             context.new_variable(size, identifier);
         }
@@ -49,14 +52,14 @@ public:
         context.array_size = initialisers->node_list.size();
         Declarator::compile(os, dest_reg, context);
         if (context.in_global()) {
-            for (int i = 0; i < initialisers->node_list.size(); i++) {
+            for (unsigned i = 0; i < initialisers->node_list.size(); i++) {
                 // TODO codegen
                 // Instance of Constant has identifier equal to the number it represents.
                 initialisers->node_list[i]->compile(os, dest_reg,context);
             }
         } else {
             int fp_offset = context.find_fp_offset(identifier); // Get fp offset
-            for (int i = 0; i < initialisers->node_list.size(); i++) {
+            for (unsigned i = 0; i < initialisers->node_list.size(); i++) {
                 initialisers->node_list[i]->compile(os, dest_reg, context);
                 context.store_reg(os, dest_reg, fp_offset + (size * i));
             }
@@ -74,12 +77,12 @@ public:
 
     ArrayDeclarator(std::string i) : Declarator(i) {}
 
-    void compile(std::ostream& os, int dest_reg, Context& context) {
+    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) {
         if (context.in_global()) {
             // TODO codegen declare a new global array
             auto l1 = new_label(identifier);
-            std::cout << l1 << ":" << std::endl;
-            std::cout << ".zero " << size << std::endl;
+            os << l1 << ":" << std::endl;
+            os << ".zero " << size << std::endl;
 
 
         } else {
@@ -101,16 +104,16 @@ public:
         delete parameter_list;
     }
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
+    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
         if (context.function_declarator_start) {
-            std::cout << identifier << ":" << std::endl;
+            os << identifier << ":" << std::endl;
             context.new_scope(os, identifier);
-            for (int i = 0; i < parameter_list->node_list.size(); i++) {
+            for (unsigned i = 0; i < parameter_list->node_list.size(); i++) {
                 parameter_list->node_list[i]->compile(os, i + 10, context);
             }
         } else {
             context.leave_scope(os);
-            std::cout << "jr ra" << std::endl;
+            os << "jr ra" << std::endl;
         }
     }
 

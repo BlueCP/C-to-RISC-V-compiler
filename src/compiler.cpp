@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <unistd.h>
+#include <string>
 
 #include "cli.h"
 
@@ -39,12 +40,12 @@ int main(int argc, char **argv)
     // TODO: uncomment the below lines if you're using Flex/Bison.
     // This configures Flex to look at sourcePath instead of
     // reading from stdin.
-    // yyin = fopen(sourcePath, "r");
-    // if (yyin == NULL)
-    // {
-    //     perror("Could not open source file");
-    //     return 1;
-    // }
+    yyin = fopen(sourcePath.c_str(), "r");
+    if (yyin == NULL)
+    {
+        perror("Could not open source file");
+        return 1;
+    }
 
     // Open the output file in truncation mode (to overwrite the contents)
     std::ofstream output;

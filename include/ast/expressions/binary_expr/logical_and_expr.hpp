@@ -16,16 +16,16 @@ public:
         std::string l2 = new_label("l2");
         std::string l3 = new_label("l3");
 
-        std::cout << "beq " << reg_name[reg1] << ", 0, ." << l2 << std::endl;
-        std::cout << "beq " << reg_name[reg2] << ", 0, ." << l2 << ":" << std::endl;
+        os << "beq " << reg_name[reg1] << ", 0, ." << l2 << std::endl;
+        os << "beq " << reg_name[reg2] << ", 0, ." << l2 << ":" << std::endl;
 
-        std::cout << "li " << reg_name[dest_reg] << ", 1" << std::endl;
-        std::cout << "j ." << l3 << std::endl;
+        os << "li " << reg_name[dest_reg] << ", 1" << std::endl;
+        os << "j ." << l3 << std::endl;
 
-        std::cout << "."<< l2 <<":" << std::endl;
-        std::cout << "li " << reg_name[dest_reg] << ", 0" << std::endl;
+        os << "."<< l2 <<":" << std::endl;
+        os << "li " << reg_name[dest_reg] << ", 0" << std::endl;
 
-        std::cout << "." << l3 << ":" << std::endl;
+        os << "." << l3 << ":" << std::endl;
 
         free(reg1, reg2, context);
     }

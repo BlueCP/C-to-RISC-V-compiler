@@ -8,7 +8,7 @@ public:
 
     ForStatement(Node* i, Node* c, Node* u, Node* b)
         : initial_statement(i), condition(c), update_statement(u), body(b) {}
-    
+
     ForStatement(Node* i, Node* c, Node* b)
         : initial_statement(i), condition(c), update_statement(nullptr), body(b) {}
 
@@ -29,9 +29,9 @@ public:
         context.break_label = l2;
 
         initial_statement->compile(os, dest_reg, context);
-        std::cout << "." << l1 << ":" << std::endl;
+        os << "." << l1 << ":" << std::endl;
         condition->compile(os, dest_reg, context);
-        std::cout << "bne " << reg_name[dest_reg] << ", 0, ." << l2 << std::endl;
+        os << "bne " << reg_name[dest_reg] << ", 0, ." << l2 << std::endl;
 
         //body
         body->compile(os,dest_reg,context);
@@ -39,8 +39,8 @@ public:
         if(update_statement != nullptr){
             update_statement->compile(os, dest_reg, context);
         }
-        std::cout << "j ." << l1 << std::endl;
-        std::cout << "." << l2 << ":" << std::endl;
+        os << "j ." << l1 << std::endl;
+        os << "." << l2 << ":" << std::endl;
         // Update context.continue_label and context.break_label.
     }
 

@@ -9,8 +9,10 @@ public:
     EmptyNode() {}
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
-        // Do nothing.
-
+        (void)os;
+        (void)dest_reg;
+        (void)context;
+        // Do nothing (casts to void to suppress warnings).
     }
 
 };

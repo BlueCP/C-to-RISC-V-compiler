@@ -10,8 +10,9 @@ public:
         value = n;
     }
 
-    void compile(std::ostream& os, int dest_reg, Context& context) const {
-        std::cout << "li " << reg_name[dest_reg] << " " << value << std::endl;
+    void compile(std::ostream& os, int dest_reg, __attribute__((__unused__)) Context& context) const {
+        // Creating a constant has no dependence on context.
+        os << "li " << reg_name[dest_reg] << " " << value << std::endl;
     }
 
 };
@@ -20,7 +21,7 @@ public:
 class Identifier : public Node {
 
 public:
-    
+
     Identifier(std::string s) : Node(s) {}
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {

@@ -12,8 +12,8 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         expr->compile(os, dest_reg, context);
-        std::cout << "seqz " << reg_name[dest_reg] << ", " << reg_name[dest_reg] << std::endl;
-        std::cout << "andi " << reg_name[dest_reg] << ", " << reg_name[dest_reg] << ", 0xff" << std::endl;
+        os << "seqz " << reg_name[dest_reg] << ", " << reg_name[dest_reg] << std::endl;
+        os << "andi " << reg_name[dest_reg] << ", " << reg_name[dest_reg] << ", 0xff" << std::endl;
     }
 
 };

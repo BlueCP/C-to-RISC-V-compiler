@@ -12,7 +12,7 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const {
         expr->compile(os, dest_reg, context);
-        std::cout << "not " << reg_name[dest_reg] << ", " << reg_name[dest_reg] << std::endl;
+        os << "not " << reg_name[dest_reg] << ", " << reg_name[dest_reg] << std::endl;
     }
 
 };

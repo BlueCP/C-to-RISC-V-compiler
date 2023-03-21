@@ -20,12 +20,12 @@ public:
         context.continue_label = l1;
         context.break_label = l2;
 
-        std::cout << "." << l1 << ":" << std::endl;        
+        os << "." << l1 << ":" << std::endl;
         condition->compile(os, dest_reg, context);
-        std::cout << "beq " << reg_name[dest_reg] << ", 0, ." << l2 << std::endl;
+        os << "beq " << reg_name[dest_reg] << ", 0, ." << l2 << std::endl;
         statement->compile(os, dest_reg, context);
-        std::cout << "j ." << l1 << std::endl;
-        std::cout << "." << l2 << ":" << std::endl;
+        os << "j ." << l1 << std::endl;
+        os << "." << l2 << ":" << std::endl;
         // Update context.continue_label and context.break_label.
     }
 

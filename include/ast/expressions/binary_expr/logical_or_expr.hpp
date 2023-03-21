@@ -17,17 +17,17 @@ public:
         std::string l4 = new_label("l4");
 
 
-        std::cout << "bne " << reg_name[reg1] << ", 0, ." << l2 << ":" << std::endl;
-        std::cout << "beq " << reg_name[reg2] << ", 0, ." << l3 << ":" << std::endl;
+        os << "bne " << reg_name[reg1] << ", 0, ." << l2 << ":" << std::endl;
+        os << "beq " << reg_name[reg2] << ", 0, ." << l3 << ":" << std::endl;
 
-        std::cout << "." << l2 << ":" << std::endl;
-        std::cout << "li " << reg_name[dest_reg] << ", 1" << std::endl;
-        std::cout << "j ." << l4 << std::endl;
+        os << "." << l2 << ":" << std::endl;
+        os << "li " << reg_name[dest_reg] << ", 1" << std::endl;
+        os << "j ." << l4 << std::endl;
 
-        std::cout << "." << l3 << ":" << std::endl;
-        std::cout << "li " << reg_name[dest_reg] << ", 0" << std::endl;
+        os << "." << l3 << ":" << std::endl;
+        os << "li " << reg_name[dest_reg] << ", 0" << std::endl;
 
-        std::cout << "."<< l4 << ":" << std::endl;
+        os << "."<< l4 << ":" << std::endl;
         free(reg1, reg2, context);
     }
 

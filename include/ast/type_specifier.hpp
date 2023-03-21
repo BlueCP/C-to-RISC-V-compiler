@@ -25,6 +25,8 @@ public:
         }
     }
 
+    virtual ~TypeSpec() = 0;
+
     int size; // In bytes
     bool is_signed = true; // Is this type signed? Assume true by default.
 

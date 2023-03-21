@@ -63,5 +63,6 @@
 #include "ast/node_list.hpp"
 #include "ast/node.hpp"
 #include "ast/type_specifier.hpp"
+#include "ast/utils.hpp"
 
 extern Node *parseAST();

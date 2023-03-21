@@ -15,13 +15,14 @@ public:
         delete arg_list;
     }
 
-    void compile(std::ostream& os, int dest_reg, Context& context) {
-        for (int i = 0; i < arg_list->node_list.size(); i++) {
+    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) {
+        // Function call is independent of dest_reg.
+        for (unsigned i = 0; i < arg_list->node_list.size(); i++) {
             arg_list->node_list[i]->compile(os, 10 + i, context); // Load argument registers
         }
-        std::cout << "call " << identifier << std::endl;
+        os << "call " << identifier << std::endl;
     }
 
     NodeList* arg_list;
-    
+
 };
