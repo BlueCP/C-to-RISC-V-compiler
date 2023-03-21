@@ -15,6 +15,8 @@ void FunctionDef::compile(std::ostream& os, int dest_reg, Context& context) cons
     std::string func_end_label = new_label("f_end");
     context.func_end_label = func_end_label;
 
+    os << ".globl " << declarator->identifier << std::endl;
+
     declarator->compile(os, dest_reg, context); // Generate function header
     compound_statement->compile(os, dest_reg, context); // Generate function body
 

@@ -9,7 +9,7 @@
 void compile(std::ostream &w)
 {
     w << ".text" << std::endl;
-    w << ".globl f" << std::endl;
+    // w << ".globl f" << std::endl;
     w << std::endl;
 
     // w << "f:" << std::endl;
