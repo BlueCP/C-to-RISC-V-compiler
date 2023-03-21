@@ -49,7 +49,8 @@ extern "C" int fileno(FILE *stream);
 "volatile"              { return(VOLATILE); }
 "while"                 { return(WHILE); }
 
-{L}({L}|{D})*           { yylval.string = new std::string(yytext); return(check_type()); }
+{L}({L}|{D})*           { yylval.string = new std::string(yytext); return(IDENTIFIER); // Return identifier instead of checkType for now.
+}
 
 0[xX]{H}+{IS}?          { return(CONSTANT); }
 0{D}+{IS}?              { yylval.number = strtod(yytext, 0); return(CONSTANT); } // Neglect unsigned/long types for now.

@@ -20,9 +20,9 @@
   Node* node;
   NodeList* node_list;
   Declarator* declarator;
-  std::vector<Declarator*> declarator_list;
+  std::vector<Declarator*>* declarator_list;
   InitDeclarator* init_declarator;
-  std::vector<InitDeclarator*> init_declarator_list;
+  std::vector<InitDeclarator*>* init_declarator_list;
   TypeSpec* type_spec;
 }
 
@@ -78,7 +78,7 @@ The following statements are invalid and are left only to keep track of what the
 
 %%
 
-root : translation_unit { g_root = $$; }
+root : translation_unit { g_root = $1; }
 
 primary_expression
   : IDENTIFIER { $$ = new Identifier(*$1); delete $1; }
@@ -108,17 +108,17 @@ unary_expression
   | INC_OP unary_expression { $$ = new PreIncExpr($2); }
   | DEC_OP unary_expression { $$ = new PreDecExpr($2); }
   | unary_operator cast_expression {
-    if (*$1 == '&') {
+    if (*$1 == "&") {
       $$ = new AddrOfExpr($2);
-    } else if (*$1 == '*') {
+    } else if (*$1 == "*") {
       $$ = new DerefExpr($2);
-    } else if (*$1 == '+') {
+    } else if (*$1 == "+") {
       $$ = new PlusExpr($2);
-    } else if (*$1 == '-') {
+    } else if (*$1 == "-") {
       $$ = new MinusExpr($2);
-    } else if (*$1 == '~') {
+    } else if (*$1 == "~") {
       $$ = new BitNotExpr($2);
-    } else if (*$1 == '!') {
+    } else if (*$1 == "!") {
       $$ = new NotExpr($2);
     } else {
       // Error
@@ -130,12 +130,12 @@ unary_expression
   ;
 
 unary_operator
-  : '&' { $$ = new std::string('&'); }
-  | '*' { $$ = new std::string('*'); }
-  | '+' { $$ = new std::string('+'); }
-  | '-' { $$ = new std::string('-'); }
-  | '~' { $$ = new std::string('~'); }
-  | '!' { $$ = new std::string('!'); }
+  : '&' { $$ = new std::string("&"); }
+  | '*' { $$ = new std::string("*"); }
+  | '+' { $$ = new std::string("+"); }
+  | '-' { $$ = new std::string("-"); }
+  | '~' { $$ = new std::string("~"); }
+  | '!' { $$ = new std::string("!"); }
   ;
 
 // Do not implement casts.
@@ -184,7 +184,7 @@ and_expression
 
 exclusive_or_expression
   : and_expression { $$ = $1; }
-  | exclusive_or_expression '^' and_expression { $$ = new ExclOrExp($1, $3); }
+  | exclusive_or_expression '^' and_expression { $$ = new ExclOrExpr($1, $3); }
   ;
 
 inclusive_or_expression
@@ -194,17 +194,17 @@ inclusive_or_expression
 
 logical_and_expression
   : inclusive_or_expression { $$ = $1; }
-  | logical_and_expression AND_OP inclusive_or_expression { $$ = new LogicalAndExpression($1, $3); }
+  | logical_and_expression AND_OP inclusive_or_expression { $$ = new LogicalAndExpr($1, $3); }
   ;
 
 logical_or_expression
   : logical_and_expression { $$ = $1; }
-  | logical_or_expression OR_OP logical_and_expression { $$ = new LogicalOrExpression($1, $3); }
+  | logical_or_expression OR_OP logical_and_expression { $$ = new LogicalOrExpr($1, $3); }
   ;
 
 conditional_expression
   : logical_or_expression { $$ = $1; }
-  | logical_or_expression '?' expression ':' conditional_expression { $$ = new TernaryOperator($1, $3, $5); }
+  | logical_or_expression '?' expression ':' conditional_expression { $$ = new TernaryOp($1, $3, $5); }
   ;
 
 assignment_expression
@@ -228,7 +228,7 @@ assignment_expression
     } else if (*$2 == ">>=") {
       $$ = new AssignmentExpr($1, new RshiftExpr($1, $3));
     } else if (*$2 == "&=") {
-      $$ = new AssignmentExpr($1, new BitAndExpr($1, $3));
+      $$ = new AssignmentExpr($1, new AndExpr($1, $3));
     } else if (*$2 == "^=") {
       $$ = new AssignmentExpr($1, new ExclOrExpr($1, $3));
     } else if (*$2 == "|=") {
@@ -241,17 +241,17 @@ assignment_expression
   ;
 
 assignment_operator
-  : '=' { $$ = new std::string('='); }
-  | MUL_ASSIGN { $$ = new std::string('*='); }
-  | DIV_ASSIGN { $$ = new std::string('/='); }
-  | MOD_ASSIGN { $$ = new std::string('%='); }
-  | ADD_ASSIGN { $$ = new std::string('+='); }
-  | SUB_ASSIGN { $$ = new std::string('-='); }
-  | LEFT_ASSIGN { $$ = new std::string('<<='); }
-  | RIGHT_ASSIGN { $$ = new std::string('>>='); }
-  | AND_ASSIGN { $$ = new std::string('&='); }
-  | XOR_ASSIGN { $$ = new std::string('^='); }
-  | OR_ASSIGN { $$ = new std::string('|='); }
+  : '=' { $$ = new std::string("="); }
+  | MUL_ASSIGN { $$ = new std::string("*="); }
+  | DIV_ASSIGN { $$ = new std::string("/="); }
+  | MOD_ASSIGN { $$ = new std::string("%="); }
+  | ADD_ASSIGN { $$ = new std::string("+="); }
+  | SUB_ASSIGN { $$ = new std::string("-="); }
+  | LEFT_ASSIGN { $$ = new std::string("<<="); }
+  | RIGHT_ASSIGN { $$ = new std::string(">>="); }
+  | AND_ASSIGN { $$ = new std::string("&="); }
+  | XOR_ASSIGN { $$ = new std::string("^="); }
+  | OR_ASSIGN { $$ = new std::string("|="); }
   ;
 
 expression
@@ -309,15 +309,15 @@ storage_class_specifier
 // Only implement void, char, int, float, double, unsigned, struct, enum.
 // This defines the type for functions, parameters (of functions), and declarations.
 type_specifier
-  : VOID { $$ = new TypeSpec("void"); }
-  | CHAR { $$ = new TypeSpec("char"); }
+  : VOID { $$ = new PrimType("void"); }
+  | CHAR { $$ = new PrimType("char"); }
   | SHORT
-  | INT { $$ = new TypeSpec("int"); }
+  | INT { $$ = new PrimType("int"); }
   | LONG
-  | FLOAT { $$ = new TypeSpec("float"); }
-  | DOUBLE { $$ = new TypeSpec("double"); }
+  | FLOAT { $$ = new PrimType("float"); }
+  | DOUBLE { $$ = new PrimType("double"); }
   | SIGNED
-  | UNSIGNED { $$ = new TypeSpec("unsigned"); }
+  | UNSIGNED { $$ = new PrimType("unsigned"); }
   | struct_or_union_specifier
   | enum_specifier { $$ = $1; }
   | TYPE_NAME
@@ -389,7 +389,7 @@ declarator
   ;
 
 direct_declarator
-  : IDENTIFIER { $$ = new Declarator(*$1); delete $1; }
+  : IDENTIFIER { $$ = new BasicDeclarator(*$1); delete $1; }
   | '(' declarator ')' { $$ = $2; }
   | direct_declarator '[' constant_expression ']' { $$ = new ArrayDeclarator($1->identifier); delete $1; }
   | direct_declarator '[' ']' { $$ = new ArrayDeclarator($1->identifier); delete $1; }
@@ -399,7 +399,7 @@ direct_declarator
   ;
 
 pointer
-  : '*' { $$ = new std::string('*'); }
+  : '*' { $$ = new std::string("*"); }
   | '*' type_qualifier_list
   | '*' pointer
   | '*' type_qualifier_list pointer
@@ -483,7 +483,7 @@ labeled_statement
   ;
 
 compound_statement
-  : '{' '}' { $$ = new EmptyNode(); }
+  : '{' '}' { $$ = new NodeList(new EmptyNode()); }
   | '{' statement_list '}' { $$ = $2; }
   | '{' declaration_list '}' { $$ = $2; }
   | '{' declaration_list statement_list '}' {

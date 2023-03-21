@@ -23,7 +23,7 @@ public:
 
     Node(std::string i) : identifier(i) {}
 
-    virtual ~Node () = 0;
+    virtual ~Node () {}
 
     virtual void compile(std::ostream& os, int dest_reg, Context& context) const = 0;
 

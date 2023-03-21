@@ -13,7 +13,7 @@ public:
         delete index;
     }
 
-    void compile(std::ostream& os, int dest_reg, Context& context) {
+    void compile(std::ostream& os, int dest_reg, Context& context) const {
         context.array_offset_reg = context.get_reg();
         index->compile(os, context.array_offset_reg, context); // Evaluate array index
 

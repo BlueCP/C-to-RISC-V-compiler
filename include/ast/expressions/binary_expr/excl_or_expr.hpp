@@ -2,11 +2,11 @@
 
 #include "binary_op.hpp"
 
-class ExclOrExp : public BinaryOp {
+class ExclOrExpr : public BinaryOp {
 
 public:
 
-    ExclOrExp(Node* l, Node* r) : BinaryOp(l, r) {
+    ExclOrExpr(Node* l, Node* r) : BinaryOp(l, r) {
         value = l->value ^ r->value;
     }
 

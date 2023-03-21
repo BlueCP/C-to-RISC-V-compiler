@@ -7,7 +7,22 @@ class TypeSpec : public Node {
 
 public:
 
-    TypeSpec(std::string i) : Node(i) {
+    TypeSpec() {}
+
+    TypeSpec(std::string i) : Node(i) {}
+
+    virtual ~TypeSpec() {}
+
+    int size; // In bytes
+    bool is_signed = true; // Is this type signed? Assume true by default.
+
+};
+
+class PrimType : public TypeSpec {
+
+public:
+
+    PrimType(std::string i) : TypeSpec(i) {
         if (i == "void") {
             size = 0;
         } else if (i == "char") {
@@ -25,17 +40,30 @@ public:
         }
     }
 
-    virtual ~TypeSpec() = 0;
+    ~PrimType() {
+        // Nothing to delete.
+    }
 
-    int size; // In bytes
-    bool is_signed = true; // Is this type signed? Assume true by default.
+    void compile(std::ostream& os, int dest_reg, Context& context) const {
+        // Don't generate any assembly.
+    }
 
 };
 
 // EnumType is used if a variable or function is declared as type enum (identifier).
 class EnumType : public TypeSpec {
 
+public:
+
     EnumType(std::string i) : TypeSpec(i) {}
+
+    ~EnumType() {
+        // Nothing to delete.
+    }
+
+    void compile(std::ostream& os, int dest_reg, Context& context) const {
+        // Don't generate any assembly.
+    }
 
 };
 
@@ -52,7 +80,7 @@ public:
         delete enum_list;
     }
 
-    void compile(std::ostream& os, int dest_reg, Context& context) {
+    void compile(std::ostream& os, int dest_reg, Context& context) const {
         context.enum_counter = 0;
         enum_list->compile(os, dest_reg, context);
     }

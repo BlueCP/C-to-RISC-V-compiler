@@ -14,7 +14,7 @@ public:
         delete expr;
     }
 
-    void compile(__attribute__((__unused__)) std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) {
+    void compile(__attribute__((__unused__)) std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
         // Note that an enum declaration does not directly produce any assembly,
         // all logic is handled by the compiler at compile-time.
         if (expr == nullptr) {

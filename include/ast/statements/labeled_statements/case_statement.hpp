@@ -13,7 +13,7 @@ public:
         delete statement;
     }
 
-    void compile(std::ostream& os, int dest_reg, Context& context) {
+    void compile(std::ostream& os, int dest_reg, Context& context) const {
         // dest_reg contains the value being switched.
         auto end = new_label("end");
         auto statementl = new_label("statement");

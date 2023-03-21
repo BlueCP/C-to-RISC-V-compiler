@@ -15,7 +15,7 @@ public:
         delete arg_list;
     }
 
-    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) {
+    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
         // Function call is independent of dest_reg.
         for (unsigned i = 0; i < arg_list->node_list.size(); i++) {
             arg_list->node_list[i]->compile(os, 10 + i, context); // Load argument registers

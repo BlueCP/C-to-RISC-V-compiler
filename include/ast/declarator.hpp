@@ -10,14 +10,14 @@ class Declarator : public Node {
 
 public:
 
-    Declarator(std::string _i) : identifier(_i) {}
+    Declarator(std::string i) : identifier(i) {}
 
     Declarator(std::string i, bool p) : Node(i), pointer(p) {}
 
-    virtual ~Declarator() = 0;
+    virtual ~Declarator() {}
 
     // By default, Declarator declares a single variable.
-    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) {
+    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
         // Declarator::compile does not depend on dest_reg since it does not deal with 'values'.
         if (context.in_global()) {
             // TODO codegen declare a new global variable
@@ -31,6 +31,18 @@ public:
     std::string identifier;
     bool pointer;
     int size; // In bytes
+
+};
+
+class BasicDeclarator : public Declarator {
+
+public:
+
+    BasicDeclarator(std::string i) : Declarator(i) {}
+
+    BasicDeclarator(std::string i, bool p) : Declarator(i, p) {}
+
+    ~BasicDeclarator() {} // Nothing to delete.
 
 };
 
@@ -48,7 +60,7 @@ public:
         delete initialisers;
     }
 
-    void compile(std::ostream& os, int dest_reg, Context& context) {
+    void compile(std::ostream& os, int dest_reg, Context& context) const {
         context.array_size = initialisers->node_list.size();
         Declarator::compile(os, dest_reg, context);
         if (context.in_global()) {
@@ -77,7 +89,7 @@ public:
 
     ArrayDeclarator(std::string i) : Declarator(i) {}
 
-    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) {
+    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
         if (context.in_global()) {
             // TODO codegen declare a new global array
             auto l1 = new_label(identifier);
@@ -132,7 +144,7 @@ public:
         delete declarator;
     }
 
-    void compile(std::ostream& os, int dest_reg, Context& context) {
+    void compile(std::ostream& os, int dest_reg, Context& context) const {
         declarator->compile(os, dest_reg, context);
         int fp_offset = context.find_fp_offset(identifier);
         context.store_reg(os, dest_reg, fp_offset);
