@@ -52,7 +52,7 @@ extern "C" int fileno(FILE *stream);
 {L}({L}|{D})*           { yylval.string = new std::string(yytext); return(check_type()); }
 
 0[xX]{H}+{IS}?          { return(CONSTANT); }
-0{D}+{IS}?              { return(CONSTANT); }
+0{D}+{IS}?              { yylval.number = strtod(yytext, 0); return(CONSTANT); } // Neglect unsigned/long types for now.
 {D}+{IS}?               { yylval.number = strtod(yytext, 0); return(CONSTANT); }
 L?'(\\.|[^\\'])+'       { return(CONSTANT); }
 
@@ -124,7 +124,7 @@ void yyerror (char const *s)
 
 int check_type() {
 
- 
+
   return(IDENTIFIER);
 
   /*

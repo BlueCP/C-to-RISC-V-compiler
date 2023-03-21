@@ -4,8 +4,7 @@
 #include <string>
 
 #include "cli.h"
-
-#include "../include/ast.hpp"
+#include "ast.hpp"
 
 void compile(std::ostream &w)
 {

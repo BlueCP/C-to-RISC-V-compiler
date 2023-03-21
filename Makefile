@@ -13,8 +13,8 @@ default: bin/c_compiler
 src/%.o : src/%.cpp
 	$(CC) $(CPPFLAGS) -c -o $@ $<
 
-src/lexer.yy.c : src/lexer.flex src/parser.tab.cpp
-	flex -o src/lexer.yy.c src/lexer.flex
+src/lexer.yy.cpp : src/lexer.flex src/parser.tab.cpp
+	flex -o src/lexer.yy.cpp src/lexer.flex
 
 src/parser.tab.cpp : src/parser.y
 	bison -v -d src/parser.y -o src/parser.tab.cpp
