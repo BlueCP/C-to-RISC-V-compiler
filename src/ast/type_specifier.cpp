@@ -5,7 +5,7 @@ TypeSpec::TypeSpec() {}
 
 TypeSpec::TypeSpec(std::string i) : Node(i) {}
 
-virtual TypeSpec::~TypeSpec() {}
+TypeSpec::~TypeSpec() {}
 
 
 PrimType::PrimType(std::string i) : TypeSpec(i) {

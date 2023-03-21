@@ -7,7 +7,7 @@ BinaryOp::~BinaryOp() {
     delete right;
 }
 
-auto BinaryOp::eval(std::ostream& os, Context& context) const {
+RegPair BinaryOp::eval(std::ostream& os, Context& context) const {
     int reg1 = context.get_reg();
     int reg2 = context.get_reg();
     left->compile(os, reg1, context);

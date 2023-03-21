@@ -10,7 +10,7 @@ public:
 
     ~BinaryOp();
 
-    auto eval(std::ostream& os, Context& context) const;
+    RegPair eval(std::ostream& os, Context& context) const;
 
     void free(int reg1, int reg2, Context& context) const;
 

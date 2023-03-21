@@ -7,7 +7,7 @@ Declarator::Declarator(std::string i) : identifier(i) {}
 
 Declarator::Declarator(std::string i, bool p) : Node(i), pointer(p) {}
 
-virtual Declarator::~Declarator() {}
+Declarator::~Declarator() {}
 
 // By default, Declarator declares a single variable.
 void Declarator::compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
