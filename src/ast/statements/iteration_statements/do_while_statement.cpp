@@ -16,7 +16,7 @@ void DoWhileStatement::compile(std::ostream& os, int dest_reg, Context& context)
     os << "." << l1 << ":" << std::endl;
     statement->compile(os, dest_reg, context);
     condition->compile(os, dest_reg, context);
-    os << "bne " << reg_name[dest_reg] << ", 0, ." << l1 << std::endl;
+    os << "bne " << reg_name[dest_reg] << ", zero, ." << l1 << std::endl;
     // Update context.continue_label and context.break_label.
     os << "." << l2 << ":" << std::endl;
 }

@@ -115,6 +115,7 @@ int Context::find_fp_offset(std::string identifier) {
         if (v != nullptr) {
             var = v;
             depth = scope_stack.size() - 1 - i; // Depth: 0, 1, 2, ...
+            break;
         }
     }
     if (var == nullptr) {

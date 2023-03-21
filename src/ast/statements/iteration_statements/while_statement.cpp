@@ -16,7 +16,7 @@ void WhileStatement::compile(std::ostream& os, int dest_reg, Context& context) c
 
     os << "." << l1 << ":" << std::endl;
     condition->compile(os, dest_reg, context);
-    os << "beq " << reg_name[dest_reg] << ", 0, ." << l2 << std::endl;
+    os << "beq " << reg_name[dest_reg] << ", zero, ." << l2 << std::endl;
     statement->compile(os, dest_reg, context);
     os << "j ." << l1 << std::endl;
     os << "." << l2 << ":" << std::endl;

@@ -14,11 +14,11 @@ void CaseStatement::compile(std::ostream& os, int dest_reg, Context& context) co
 
     int temp_reg = context.get_reg();
 
-    os << "beq " << reg_name[context.array_offset_reg] << ", 1, ." << statementl << std::endl;
+    os << "bne " << reg_name[context.array_offset_reg] << ", zero, ." << statementl << std::endl;
     expression->compile(os, temp_reg, context);
     os << "sub " << reg_name[temp_reg] << ", " << reg_name[dest_reg] << ", " << reg_name[temp_reg] << std::endl;
     os << "seqz " << reg_name[context.switch_cascade_reg] << ", " << reg_name[temp_reg] << std::endl;
-    os << "beq " << reg_name[context.switch_cascade_reg] << ", 0, ." << end << std::endl;
+    os << "beq " << reg_name[context.switch_cascade_reg] << ", zero, ." << end << std::endl;
     // TODO CODEGEN
     // If switch_cascade_reg is 1, skip to statement
     // If temp_reg and dest_reg are equal, assign 1 to context.switch_cascade_reg

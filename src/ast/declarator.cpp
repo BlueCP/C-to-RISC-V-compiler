@@ -106,7 +106,8 @@ ParameterDeclaration::~ParameterDeclaration() {
 }
 
 void ParameterDeclaration::compile(std::ostream& os, int dest_reg, Context& context) const {
+    declarator->size = type->size;
     declarator->compile(os, dest_reg, context);
-    int fp_offset = context.find_fp_offset(identifier);
+    int fp_offset = context.find_fp_offset(declarator->identifier);
     context.store_reg(os, dest_reg, fp_offset);
 }

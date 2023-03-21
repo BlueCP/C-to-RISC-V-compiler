@@ -13,7 +13,7 @@ void IfElseStatement::compile(std::ostream& os, int dest_reg, Context& context) 
     auto l2 = new_label("l2");
 
     condition->compile(os, dest_reg, context);
-    os << "beq " << reg_name[dest_reg] << ", 0, ." << l1 << std::endl;
+    os << "bne " << reg_name[dest_reg] << ", zero, ." << l1 << std::endl;
 
     else_stat->compile(os, dest_reg, context);
     os << "j ." << l2 << std::endl;

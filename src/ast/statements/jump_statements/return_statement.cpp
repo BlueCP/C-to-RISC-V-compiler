@@ -14,5 +14,6 @@ void ReturnStatement::compile(std::ostream& os, int dest_reg, Context& context) 
     if (expression != nullptr) {
         expression->compile(os, dest_reg, context);
     }
-    context.return_flag = true;
+    os << "j ." << context.func_end_label << std::endl;
+    // context.return_flag = true;
 }

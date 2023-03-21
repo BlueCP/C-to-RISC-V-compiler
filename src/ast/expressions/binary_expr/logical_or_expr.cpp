@@ -11,8 +11,8 @@ void LogicalOrExpr::compile(std::ostream& os, int dest_reg, Context& context) co
     std::string l4 = new_label("l4");
 
 
-    os << "bne " << reg_name[reg1] << ", 0, ." << l2 << ":" << std::endl;
-    os << "beq " << reg_name[reg2] << ", 0, ." << l3 << ":" << std::endl;
+    os << "bne " << reg_name[reg1] << ", zero, ." << l2 << ":" << std::endl;
+    os << "beq " << reg_name[reg2] << ", zero, ." << l3 << ":" << std::endl;
 
     os << "." << l2 << ":" << std::endl;
     os << "li " << reg_name[dest_reg] << ", 1" << std::endl;

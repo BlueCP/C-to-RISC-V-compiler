@@ -108,5 +108,6 @@ public:
     std::string continue_label;
     std::string break_label;
     int switch_cascade_reg = 0;
+    std::string func_end_label;
 
 };

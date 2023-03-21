@@ -9,8 +9,8 @@ IfStatement::~IfStatement() {
 
 void IfStatement::compile(std::ostream& os, int dest_reg, Context& context) const {
     auto l1 = new_label("l1");
-    statement->compile(os,dest_reg,context);
-    os << "bne " << reg_name[dest_reg]  << ", 0, ." << l1 << std::endl;
-    condition->compile(os, dest_reg, context);
+    condition->compile(os,dest_reg,context);
+    os << "beq " << reg_name[dest_reg]  << ", zero, ." << l1 << std::endl;
+    statement->compile(os, dest_reg, context);
     os << "." << l1 << ":" << std::endl;
 }
