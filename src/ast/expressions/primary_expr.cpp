@@ -6,7 +6,7 @@ Constant::Constant(int n) : Node(std::to_string(n)) {
 
 void Constant::compile(std::ostream& os, int dest_reg, __attribute__((__unused__)) Context& context) const {
     // Creating a constant has no dependence on context.
-    os << "li " << reg_name[dest_reg] << " " << value << std::endl;
+    os << "li " << reg_name[dest_reg] << ", " << value << std::endl;
 }
 
 

@@ -54,7 +54,7 @@ void Context::new_scope(std::ostream& os, std::string identifier) {
 
     // 4. Move the frame pointer up (to the bottom of the previous stack frame).
     os << "addi fp, sp, " << STACK_FRAME_SIZE << std::endl;
-    os << "addi sp, sp, 8" << std::endl;
+    // os << "addi sp, sp, 8" << std::endl;
 }
 
 // Leave the current scope and deallocate the stack frame.
@@ -130,12 +130,12 @@ int Context::find_fp_offset(std::string identifier) {
 // Used for both initialising (with new_variable) and reassigning (with find_fp_offset).
 void Context::store_reg(std::ostream& os, int reg, int fp_offset) {
     // fp + fp_offset + array_offset_reg = address to target
-    os << "sw " << reg_name[reg] <<  ", fp(" << fp_offset + array_offset_reg << ")" << std::endl;
+    os << "sw " << reg_name[reg] <<  ", " << fp_offset + array_offset_reg << "(fp)" << std::endl;
 }
 
 // Loads a register from the stack using the given fp offset.
 // Used together with find_fp_offset.
 void Context::load_reg(std::ostream& os, int reg, int fp_offset) {
     // fp + fp_offset + array_offset_reg = address to target
-    os << "lw " << reg_name[reg] << ", fp(" << fp_offset + array_offset_reg << ")" << std::endl;
+    os << "lw " << reg_name[reg] << ", " << fp_offset + array_offset_reg << "(fp)" << std::endl;
 }
