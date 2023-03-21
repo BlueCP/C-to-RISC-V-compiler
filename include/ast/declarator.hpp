@@ -122,8 +122,9 @@ public:
     }
 
     void compile(std::ostream& os, int dest_reg, Context& context) {
-        // TODO codegen push argument register to stack
-        // Use type to determine specific behaviour
+        declarator->compile(os, dest_reg, context);
+        int fp_offset = context.find_fp_offset(identifier);
+        context.store_reg(os, dest_reg, fp_offset);
     }
 
     TypeSpec* type;
