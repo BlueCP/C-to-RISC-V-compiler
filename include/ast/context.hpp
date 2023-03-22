@@ -29,13 +29,14 @@ public:
 
     ~Scope();
 
-    // Add a new variable with the given fp offset.
-    void new_variable(int size, std::string identifier, int fp_offset);
+    // Add a new variable add return the scope offset.
+    int new_variable(int size, std::string identifier, int frame_offset);
 
     // Find a variable with the given identifier.
     VarInfo* find_variable(std::string identifier);
 
     std::vector<VarInfo*> variables;
+    int scope_offset = 0; // Total fp offset = frame offset + scope offset.
 
 };
 
@@ -59,8 +60,8 @@ public:
     VarInfo* find_variable(std::string identifier);
 
     std::vector<Scope*> scope_stack;
-    int fp_offset_tracker = -4; // Starts at -4 (the first available address in the stack frame)
-                                // and decrements by some amount for each new variable, as far as needed.
+    int frame_offset = 0; // Starts at -4 after decrementing (the first available address in the stack frame)
+                          // and decrements by some amount for each new variable, as far as needed.
 
 };
 

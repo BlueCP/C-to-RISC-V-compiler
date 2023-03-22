@@ -13,8 +13,10 @@ Scope::~Scope() {
     }
 }
 
-void Scope::new_variable(int size, std::string identifier, int fp_offset) {
-    variables.push_back(new VarInfo(size, identifier, fp_offset));
+int Scope::new_variable(int size, std::string identifier, int frame_offset) {
+    scope_offset -= size;
+    variables.push_back(new VarInfo(size, identifier, scope_offset + frame_offset));
+    return frame_offset + scope_offset;
 }
 
 VarInfo* Scope::find_variable(std::string identifier) {
@@ -38,19 +40,19 @@ Frame::~Frame() {
 }
 
 void Frame::new_scope() {
+    frame_offset += scope_stack.back()->scope_offset;
     scope_stack.push_back(new Scope());
 }
 
 void Frame::leave_scope() {
+    frame_offset -= scope_stack.back()->scope_offset;
     delete scope_stack.back();
     scope_stack.pop_back();
 }
 
 int Frame::new_variable(int size, std::string identifier) {
-    fp_offset_tracker -= size;
-    scope_stack.back()->new_variable(size, identifier, fp_offset_tracker);
-    return fp_offset_tracker;
-    // If the fp_offset_tracker exceeds the stack frame size, the program will have undefined behaviour.
+    return scope_stack.back()->new_variable(size, identifier, frame_offset);
+    // If the total fp offset exceeds the stack frame size, the program will have undefined behaviour.
 }
 
 VarInfo* Frame::find_variable(std::string identifier) {
@@ -151,24 +153,33 @@ void Context::free_reg(int reg_id) {
 }
 
 int Context::find_fp_offset(std::string identifier) {
-    VarInfo* var = nullptr;
-    int depth = 0;
-    for (int i = frame_stack.size() - 1; i >= 0; i--) {
-        VarInfo* v = frame_stack[i]->find_variable(identifier);
-        if (v != nullptr) {
-            var = v;
-            depth = frame_stack.size() - 1 - i; // Depth: 0, 1, 2, ...
-            break;
-        }
-    }
+    VarInfo* var = frame_stack.back()->find_variable(identifier);
     if (var == nullptr) {
-        return -1; // -1 must be an invalid value as it is not a multiple of 4.
+        return -1; // -1 is an invalid value as it is not a multiple of 4.
     } else {
-        return var->fp_offset + (STACK_FRAME_SIZE * depth);
-        // Since fp_offset is relative to the variable's own stack frame, not the current one,
-        // we have to readjust it by counting how many frames deep we have to go.
+        return var->fp_offset;
     }
 }
+
+// int Context::find_fp_offset(std::string identifier) {
+//     VarInfo* var = nullptr;
+//     int depth = 0;
+//     for (int i = frame_stack.size() - 1; i >= 0; i--) {
+//         VarInfo* v = frame_stack[i]->find_variable(identifier);
+//         if (v != nullptr) {
+//             var = v;
+//             depth = frame_stack.size() - 1 - i; // Depth: 0, 1, 2, ...
+//             break;
+//         }
+//     }
+//     if (var == nullptr) {
+//         return -1; // -1 must be an invalid value as it is not a multiple of 4.
+//     } else {
+//         return var->fp_offset + (STACK_FRAME_SIZE * depth);
+//         // Since fp_offset is relative to the variable's own stack frame, not the current one,
+//         // we have to readjust it by counting how many frames deep we have to go.
+//     }
+// }
 
 void Context::store_reg(std::ostream& os, int reg, int fp_offset) {
     // fp + fp_offset + array_offset_reg = address to target
