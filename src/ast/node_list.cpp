@@ -23,22 +23,8 @@ void NodeList::add_node(Node* node) {
     node_list.push_back(node);
 }
 
-
-// A statement list is like a node list, except it terminates if it sees a return flag in the context.
-// Useful for lists of statements within functions.
-
-StatementList::StatementList(Node* node) {
-    node_list.push_back(node);
-}
-
-StatementList::StatementList() {}
-
-void StatementList::compile(std::ostream& os, int dest_reg, Context& context) const {
-    for (auto node : node_list) {
-        node->compile(os, dest_reg, context);
-        if (context.return_flag) {
-            context.return_flag = false; // Reset flag
-            break; // Terminate early on return
-        }
+void NodeList::add_list(NodeList* list) {
+    for (auto node : list->node_list) {
+        node_list.push_back(node);
     }
 }

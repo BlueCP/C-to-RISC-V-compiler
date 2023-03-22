@@ -22,7 +22,9 @@ int Scope::new_variable(int size, std::string identifier) {
 }
 
 VarInfo* Scope::find_variable(std::string identifier) {
-    for (auto v : variables) {
+    // Iterate backwards through variables to find the one in the narrowest scope.
+    for (int i = variables.size() - 1; i >= 0; i--) {
+        VarInfo* v = variables[i];
         if (v->identifier == identifier) {
             return v;
         }

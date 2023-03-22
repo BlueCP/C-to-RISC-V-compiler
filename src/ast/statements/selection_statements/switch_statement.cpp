@@ -8,9 +8,12 @@ SwitchStatement::~SwitchStatement() {
 }
 
 void SwitchStatement::compile(std::ostream& os, int dest_reg, Context& context) const {
-    // TODO codegen add end label and update context.break_label.
+    std::string end_label = new_label("switch_end");
+    context.break_label = end_label;
+
     expression->compile(os, dest_reg, context); // Expression to be switched goes in dest_reg
     context.switch_cascade_reg = context.get_clean_reg(os);
     statement->compile(os, dest_reg, context);
+    os << "." << end_label << ":" << std::endl;
     context.free_reg(context.switch_cascade_reg);
 }

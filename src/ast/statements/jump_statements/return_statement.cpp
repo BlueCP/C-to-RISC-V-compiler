@@ -15,5 +15,4 @@ void ReturnStatement::compile(std::ostream& os, int dest_reg, Context& context) 
         expression->compile(os, dest_reg, context);
     }
     os << "j ." << context.func_end_label << std::endl;
-    // context.return_flag = true;
 }

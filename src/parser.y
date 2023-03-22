@@ -63,10 +63,11 @@ The following statements are invalid and are left only to keep track of what the
 %type <node> expression constant_expression
 // Statements
 %type <node> expression_statement iteration_statement selection_statement labeled_statement statement jump_statement
+%type <node> compound_statement
 // Other stuff
 %type <node> declaration enumerator parameter_declaration root
 // Node lists
-%type <node_list> compound_statement statement_list declaration_list translation_unit argument_expression_list
+%type <node_list> statement_list declaration_list translation_unit argument_expression_list
 %type <node_list> initializer initializer_list enumerator_list parameter_list parameter_type_list
 
 %type <declarator> declarator direct_declarator init_declarator
@@ -483,23 +484,19 @@ labeled_statement
   ;
 
 compound_statement
-  : '{' '}' { $$ = new NodeList(new EmptyNode()); }
-  | '{' statement_list '}' { $$ = $2; }
-  | '{' declaration_list '}' { $$ = $2; }
-  | '{' declaration_list statement_list '}' {
-    $$ = new StatementList();
-    $$->add_node($2);
-    $$->add_node($3);
-  }
+  : '{' '}' { $$ = new CompoundStatement(); }
+  | '{' statement_list '}' { $$ = new CompoundStatement($2); }
+  | '{' declaration_list '}' { $$ = new CompoundStatement($2); }
+  | '{' declaration_list statement_list '}' { $$ = new CompoundStatement($2, $3); }
   ;
 
 declaration_list
-  : declaration { $$ = new StatementList($1); }
+  : declaration { $$ = new NodeList($1); }
   | declaration_list declaration { $$ = $1; $$->add_node($2); }
   ;
 
 statement_list
-  : statement { $$ = new StatementList($1); }
+  : statement { $$ = new NodeList($1); }
   | statement_list statement { $$ = $1; $$->add_node($2); }
   ;
 

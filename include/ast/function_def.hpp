@@ -9,7 +9,7 @@ class FunctionDef : public Node {
 
 public:
 
-    FunctionDef(TypeSpec* t, Declarator* d, NodeList* c);
+    FunctionDef(TypeSpec* t, Declarator* d, Node* c);
 
     ~FunctionDef();
 
@@ -17,6 +17,6 @@ public:
 
     TypeSpec* return_type;
     Declarator* declarator;
-    NodeList* compound_statement;
+    Node* compound_statement;
 
 };

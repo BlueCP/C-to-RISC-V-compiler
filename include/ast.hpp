@@ -55,6 +55,8 @@
 #include "ast/statements/selection_statements/if_statement.hpp"
 #include "ast/statements/selection_statements/switch_statement.hpp"
 
+#include "ast/statements/compound_statement.hpp"
+
 #include "ast/context.hpp"
 #include "ast/declaration.hpp"
 #include "ast/declarator.hpp"
