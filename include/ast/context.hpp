@@ -140,5 +140,10 @@ public:
     int switch_cascade_reg = 0;
     std::string func_end_label;
     bool function_def = false; // Whether or not we are currently defining (as opposed to declaring) a function.
+    bool case_headers = false; // Whether we are generating the headers or footers of case statements.
+                               // We default to false because if case_headers is true, we have special behaviour
+                               // in node_list.
+    int case_index = 0;
+    std::vector<std::string> case_labels;
 
 };

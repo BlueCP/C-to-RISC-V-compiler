@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../node.hpp"
+#include "../node_list.hpp"
 
 class CompoundStatement : public Node {
 
@@ -8,15 +9,15 @@ public:
 
     CompoundStatement();
 
-    CompoundStatement(Node* l1);
+    CompoundStatement(NodeList* l1);
 
-    CompoundStatement(Node* l1, Node* l2);
+    CompoundStatement(NodeList* l1, NodeList* l2);
 
     ~CompoundStatement();
 
     void compile(std::ostream& os, int dest_reg, Context& context) const;
 
-    Node* list_1;
-    Node* list_2;
+    NodeList* list_1;
+    NodeList* list_2;
 
 };

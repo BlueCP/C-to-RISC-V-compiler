@@ -2,9 +2,9 @@
 
 CompoundStatement::CompoundStatement() : list_1(nullptr), list_2(nullptr) {}
 
-CompoundStatement::CompoundStatement(Node* l1) : list_1(l1), list_2(nullptr) {}
+CompoundStatement::CompoundStatement(NodeList* l1) : list_1(l1), list_2(nullptr) {}
 
-CompoundStatement::CompoundStatement(Node* l1, Node* l2) : list_1(l1), list_2(l2) {}
+CompoundStatement::CompoundStatement(NodeList* l1, NodeList* l2) : list_1(l1), list_2(l2) {}
 
 CompoundStatement::~CompoundStatement() {
     if (list_1 != nullptr) {

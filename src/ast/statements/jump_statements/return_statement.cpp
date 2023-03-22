@@ -12,7 +12,7 @@ ReturnStatement::~ReturnStatement() {
 
 void ReturnStatement::compile(std::ostream& os, int dest_reg, Context& context) const {
     if (expression != nullptr) {
-        expression->compile(os, dest_reg, context);
+        expression->compile(os, 10, context); // Return always loads into register a0.
     }
     os << "j ." << context.func_end_label << std::endl;
 }

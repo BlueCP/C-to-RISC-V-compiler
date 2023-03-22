@@ -143,7 +143,6 @@ int Context::get_reg() {
 
 int Context::get_clean_reg(std::ostream& os) {
     int reg = get_reg();
-    // TODO codegen set this reg to 0.
     os << "addi " << reg_name[reg] << ", zero, 0" << std::endl;
     return reg;
 }

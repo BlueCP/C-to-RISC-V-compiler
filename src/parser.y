@@ -24,6 +24,7 @@
   InitDeclarator* init_declarator;
   std::vector<InitDeclarator*>* init_declarator_list;
   TypeSpec* type_spec;
+  CompoundStatement* compound_statement;
 }
 
 %token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
@@ -63,7 +64,6 @@ The following statements are invalid and are left only to keep track of what the
 %type <node> expression constant_expression
 // Statements
 %type <node> expression_statement iteration_statement selection_statement labeled_statement statement jump_statement
-%type <node> compound_statement
 // Other stuff
 %type <node> declaration enumerator parameter_declaration root
 // Node lists
@@ -74,6 +74,8 @@ The following statements are invalid and are left only to keep track of what the
 %type <declarator_list> init_declarator_list
 
 %type <type_spec> enum_specifier type_specifier declaration_specifiers
+
+%type <compound_statement> compound_statement
 
 %start root
 

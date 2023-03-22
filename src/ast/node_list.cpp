@@ -15,7 +15,10 @@ NodeList::~NodeList() {
 
 void NodeList::compile(std::ostream& os, int dest_reg, Context& context) const {
     for (auto node : node_list) {
-        node->compile(os, dest_reg, context);
+        if (!context.case_headers || (context.case_headers && (node->identifier == "case" || node->identifier == "default"))) {
+            // If context.case_headers is true, we only want to compile case statements.
+            node->compile(os, dest_reg, context);
+        }
     }
 }
 
