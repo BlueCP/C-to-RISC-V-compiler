@@ -1,8 +1,9 @@
 #include "ast/expressions/binary_expr/mod_expr.hpp"
 
-
 ModExpr::ModExpr(Node* l, Node* r) : BinaryOp(l, r) {
-    value = l->value % r->value;
+    if (r->value != 0) {
+        value = l->value % r->value;
+    }
 }
 
 void ModExpr::compile(std::ostream& os, int dest_reg, Context& context) const {

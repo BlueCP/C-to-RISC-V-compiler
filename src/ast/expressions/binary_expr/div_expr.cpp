@@ -1,7 +1,9 @@
 #include "ast/expressions/binary_expr/div_expr.hpp"
 
 DivExpr::DivExpr(Node* l, Node* r) : BinaryOp(l, r) {
-    value = l->value / r->value;
+    if (r->value != 0) {
+        value = l->value / r->value;
+    }
 }
 
 void DivExpr::compile(std::ostream& os, int dest_reg, Context& context) const {
