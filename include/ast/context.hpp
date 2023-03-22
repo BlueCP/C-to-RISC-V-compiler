@@ -25,17 +25,40 @@ class Scope {
 
 public:
 
-    Scope(std::string i);
+    Scope();
 
     ~Scope();
+
+    // Add a new variable with the given fp offset.
+    void new_variable(int size, std::string identifier, int fp_offset);
+
+    // Find a variable with the given identifier.
+    VarInfo* find_variable(std::string identifier);
+
+    std::vector<VarInfo*> variables;
+
+};
+
+class Frame {
+
+public:
+
+    Frame();
+
+    ~Frame();
+
+    // Create a new scope.
+    void new_scope();
+
+    // Leave the scope.
+    void leave_scope();
 
     // Add a new variable to the stack frame and return the fp offset.
     int new_variable(int size, std::string identifier);
 
     VarInfo* find_variable(std::string identifier);
 
-    std::string identifier;
-    std::vector<VarInfo*> variables;
+    std::vector<Scope*> scope_stack;
     int fp_offset_tracker = -4; // Starts at -4 (the first available address in the stack frame)
                                 // and decrements by some amount for each new variable, as far as needed.
 
@@ -53,11 +76,21 @@ public:
 
     ~Context();
 
-    // Enter a new scope and create a stack frame.
-    void new_scope(std::ostream& os, std::string identifier);
+    // Create a new stack frame and enter it.
+    void new_frame(std::ostream& os);
 
-    // Leave the current scope and deallocate the stack frame.
-    void leave_scope(std::ostream& os);
+    // Deallocate the current stack frame.
+    void leave_frame(std::ostream& os);
+
+    // Create a new scope.
+    void new_scope();
+
+    // Leave the current scope.
+    void leave_scope();
+
+    // Prepares to create a new variable of given size in the current stack frame.
+    // Returns the fp offset.
+    int new_variable(int size, std::string identifier);
 
     bool in_global();
 
@@ -71,10 +104,6 @@ public:
 
     // Marks a given register as available.
     void free_reg(int reg_id);
-
-    // Prepares to create a new variable of given size in the current stack frame.
-    // Returns the fp offset.
-    int new_variable(int size, std::string identifier);
 
     // Returns the fp offset of a variable relative to the current fp.
     int find_fp_offset(std::string identifier);
@@ -94,7 +123,7 @@ public:
 
     int array_size = 0; // Number of elements in the array currently being declared.
 
-    std::vector<Scope*> scope_stack;
+    std::vector<Frame*> frame_stack;
     bool reg_available[32] = {0, 0, 0, 0, 0, 1, 1, 1,
                               0, 1, 0, 1, 1, 1, 1, 1,
                               1, 1, 1, 1, 1, 1, 1, 1,

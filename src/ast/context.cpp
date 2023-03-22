@@ -5,7 +5,7 @@ VarInfo::VarInfo(int s, std::string i, int f)
     : size(s), identifier(i), fp_offset(f) {}
 
 
-Scope::Scope(std::string i) : identifier(i) {}
+Scope::Scope() {}
 
 Scope::~Scope() {
     for (auto v : variables) {
@@ -13,19 +13,51 @@ Scope::~Scope() {
     }
 }
 
-// Add a new variable to the stack frame and return the fp offset.
-int Scope::new_variable(int size, std::string identifier) {
+void Scope::new_variable(int size, std::string identifier, int fp_offset) {
+    variables.push_back(new VarInfo(size, identifier, fp_offset));
+}
+
+VarInfo* Scope::find_variable(std::string identifier) {
+    for (auto v : variables) {
+        if (v->identifier == identifier) {
+            return v;
+        }
+    }
+    return nullptr;
+}
+
+
+Frame::Frame() {
+    scope_stack.push_back(new Scope()); // Initial scope.
+}
+
+Frame::~Frame() {
+    for (auto s : scope_stack) {
+        delete s;
+    }
+}
+
+void Frame::new_scope() {
+    scope_stack.push_back(new Scope());
+}
+
+void Frame::leave_scope() {
+    delete scope_stack.back();
+    scope_stack.pop_back();
+}
+
+int Frame::new_variable(int size, std::string identifier) {
     fp_offset_tracker -= size;
-    variables.push_back(new VarInfo(size, identifier, fp_offset_tracker));
+    scope_stack.back()->new_variable(size, identifier, fp_offset_tracker);
     return fp_offset_tracker;
     // If the fp_offset_tracker exceeds the stack frame size, the program will have undefined behaviour.
 }
 
-VarInfo* Scope::find_variable(std::string identifier) {
-    // Iterate backwards through variables to find the one in the narrowest scope.
-    for (int i = variables.size() - 1; i >= 0; i--) {
-        VarInfo* v = variables[i];
-        if (v->identifier == identifier) {
+VarInfo* Frame::find_variable(std::string identifier) {
+    // Iterate backwards through scopes.
+    for (int i = scope_stack.size() - 1; i >= 0; i--) {
+        VarInfo* v = scope_stack[i]->find_variable(identifier);
+        if (v != nullptr) {
             return v;
         }
     }
@@ -36,14 +68,13 @@ VarInfo* Scope::find_variable(std::string identifier) {
 Context::Context() {}
 
 Context::~Context() {
-    for (auto s : scope_stack) {
+    for (auto s : frame_stack) {
         delete s;
     }
 }
 
-// Enter a new scope and create a stack frame.
-void Context::new_scope(std::ostream& os, std::string identifier) {
-    scope_stack.push_back(new Scope(identifier));
+void Context::new_frame(std::ostream& os) {
+    frame_stack.push_back(new Frame());
     // 1. Move the stack pointer down (by STACK_FRAME_SIZE).
     os << "addi sp, sp, -" << STACK_FRAME_SIZE << std::endl;
     // 2. Push the return address to the stack.
@@ -65,10 +96,9 @@ void Context::new_scope(std::ostream& os, std::string identifier) {
     // os << "addi sp, sp, 8" << std::endl;
 }
 
-// Leave the current scope and deallocate the stack frame.
-void Context::leave_scope(std::ostream& os) {
-    delete scope_stack.back();
-    scope_stack.pop_back();
+void Context::leave_frame(std::ostream& os) {
+    delete frame_stack.back();
+    frame_stack.pop_back();
     // 1. Load the return address from the stack.
     os << "lw ra, 0(sp)" << std::endl;
     // 2. Load the frame pointer from the stack.
@@ -82,13 +112,23 @@ void Context::leave_scope(std::ostream& os) {
     os << "addi sp, sp, " << STACK_FRAME_SIZE << std::endl;
 }
 
+void Context::new_scope() {
+    frame_stack.back()->new_scope();
+}
+
+void Context::leave_scope() {
+    frame_stack.back()->leave_scope();
+}
+
+int Context::new_variable(int size, std::string identifier) {
+    return frame_stack.back()->new_variable(size, identifier);
+}
+
 bool Context::in_global() {
-    return scope_stack.size() == 0;
+    return frame_stack.size() == 0;
     // Being in global scope is equivalent to there not being any stack frames (I think)
 }
 
-// Returns the next available register. Useful for temporary results in calculations.
-// NOTE: Every get_reg should be matched with a free_reg.
 int Context::get_reg() {
     for (int i = 0; i < 32; i++) {
         if (reg_available[i]) {
@@ -99,8 +139,6 @@ int Context::get_reg() {
     return 10; // In future expand on this function to avoid this happening (somehow).
 }
 
-// Returns the next available register after having set it to zero.
-// NOTE: Every get_clean_reg should be matched with a free_reg.
 int Context::get_clean_reg(std::ostream& os) {
     int reg = get_reg();
     // TODO codegen set this reg to 0.
@@ -108,26 +146,18 @@ int Context::get_clean_reg(std::ostream& os) {
     return reg;
 }
 
-// Marks a given register as available.
 void Context::free_reg(int reg_id) {
     reg_available[reg_id] = true;
 }
 
-// Prepares to create a new variable of given size in the current stack frame.
-// Returns the fp offset.
-int Context::new_variable(int size, std::string identifier) {
-    return scope_stack.back()->new_variable(size, identifier);
-}
-
-// Returns the fp offset of a variable relative to the current fp.
 int Context::find_fp_offset(std::string identifier) {
     VarInfo* var = nullptr;
     int depth = 0;
-    for (int i = scope_stack.size() - 1; i >= 0; i--) {
-        VarInfo* v = scope_stack[i]->find_variable(identifier);
+    for (int i = frame_stack.size() - 1; i >= 0; i--) {
+        VarInfo* v = frame_stack[i]->find_variable(identifier);
         if (v != nullptr) {
             var = v;
-            depth = scope_stack.size() - 1 - i; // Depth: 0, 1, 2, ...
+            depth = frame_stack.size() - 1 - i; // Depth: 0, 1, 2, ...
             break;
         }
     }
@@ -140,8 +170,6 @@ int Context::find_fp_offset(std::string identifier) {
     }
 }
 
-// Stores a register in the stack using the given fp offset.
-// Used for both initialising (with new_variable) and reassigning (with find_fp_offset).
 void Context::store_reg(std::ostream& os, int reg, int fp_offset) {
     // fp + fp_offset + array_offset_reg = address to target
     if (array_indexing) {
@@ -156,8 +184,6 @@ void Context::store_reg(std::ostream& os, int reg, int fp_offset) {
     }
 }
 
-// Loads a register from the stack using the given fp offset.
-// Used together with find_fp_offset.
 void Context::load_reg(std::ostream& os, int reg, int fp_offset) {
     // fp + fp_offset + array_offset_reg = address to target
     if (array_indexing) {

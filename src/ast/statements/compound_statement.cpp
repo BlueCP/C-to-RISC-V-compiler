@@ -16,10 +16,12 @@ CompoundStatement::~CompoundStatement() {
 }
 
 void CompoundStatement::compile(std::ostream& os, int dest_reg, Context& context) const {
+    context.new_scope();
     if (list_1 != nullptr) {
         list_1->compile(os, dest_reg, context);
     }
     if (list_2 != nullptr) {
         list_2->compile(os, dest_reg, context);
     }
+    context.leave_scope();
 }
