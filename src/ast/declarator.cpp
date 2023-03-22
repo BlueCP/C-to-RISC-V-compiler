@@ -9,9 +9,15 @@ Declarator::Declarator(std::string i, bool p) : Node(i), pointer(p) {}
 
 Declarator::~Declarator() {}
 
-// By default, Declarator declares a single variable.
-void Declarator::compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
-    // Declarator::compile does not depend on dest_reg since it does not deal with 'values'.
+
+BasicDeclarator::BasicDeclarator(std::string i) : Declarator(i) {}
+
+BasicDeclarator::BasicDeclarator(std::string i, bool p) : Declarator(i, p) {}
+
+BasicDeclarator::~BasicDeclarator() {} // Nothing to delete.
+
+// BasicDeclarator declares a single variable.
+void BasicDeclarator::compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
     if (context.in_global()) {
         // TODO codegen declare a new global variable
         os << identifier << ":" << std::endl;
@@ -22,31 +28,23 @@ void Declarator::compile(std::ostream& os, __attribute__((__unused__)) int dest_
 }
 
 
-BasicDeclarator::BasicDeclarator(std::string i) : Declarator(i) {}
-
-BasicDeclarator::BasicDeclarator(std::string i, bool p) : Declarator(i, p) {}
-
-BasicDeclarator::~BasicDeclarator() {} // Nothing to delete.
-
-
-InitDeclarator::InitDeclarator(Declarator* d, NodeList* l) : Declarator(d->identifier), initialisers(l) {
-    pointer = d->pointer;
-    size = d->size;
-    delete d;
-}
+InitDeclarator::InitDeclarator(Declarator* d, NodeList* l) : Declarator(d->identifier), declarator(d), initialisers(l) {}
 
 InitDeclarator::~InitDeclarator() {
+    delete declarator;
     delete initialisers;
 }
 
 void InitDeclarator::compile(std::ostream& os, int dest_reg, Context& context) const {
     context.array_size = initialisers->node_list.size();
-    Declarator::compile(os, dest_reg, context);
+    declarator->size = size; // Declaration modifies size of InitDeclarator;
+    // Therefore we have to update the size of the child here.
+    declarator->compile(os, dest_reg, context);
     if (context.in_global()) {
         for (unsigned i = 0; i < initialisers->node_list.size(); i++) {
             // TODO codegen
             // Instance of Constant has identifier equal to the number it represents.
-            initialisers->node_list[i]->compile(os, dest_reg,context);
+            initialisers->node_list[i]->compile(os, dest_reg, context);
         }
     } else {
         int fp_offset = context.find_fp_offset(identifier); // Get fp offset
@@ -59,7 +57,15 @@ void InitDeclarator::compile(std::ostream& os, int dest_reg, Context& context) c
 }
 
 
-ArrayDeclarator::ArrayDeclarator(std::string i) : Declarator(i) {}
+ArrayDeclarator::ArrayDeclarator(std::string i) : Declarator(i), array_size(nullptr) {}
+
+ArrayDeclarator::ArrayDeclarator(std::string i, Node* s) : Declarator(i), array_size(s) {}
+
+ArrayDeclarator::~ArrayDeclarator() {
+    if (array_size != nullptr) {
+        delete array_size;
+    }
+}
 
 void ArrayDeclarator::compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
     if (context.in_global()) {
@@ -68,8 +74,12 @@ void ArrayDeclarator::compile(std::ostream& os, __attribute__((__unused__)) int 
         os << l1 << ":" << std::endl;
         os << ".zero " << size << std::endl;
 
-
     } else {
+        if (array_size != nullptr) { // If an array size was defined, evaluate that.
+            context.array_size = array_size->value;
+        } else if (context.array_size == 0) {
+            std::cout << "Array size not defined anywhere!" << std::endl;
+        }
         context.new_variable(size * context.array_size, identifier);
     }
 }

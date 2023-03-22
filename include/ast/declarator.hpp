@@ -16,8 +16,7 @@ public:
 
     virtual ~Declarator();
 
-    // By default, Declarator declares a single variable.
-    void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const;
+    // Declarator does not implement compile as it is an abstract base class.
 
     std::string identifier;
     bool pointer;
@@ -35,6 +34,8 @@ public:
 
     ~BasicDeclarator();
 
+    void compile(std::ostream& os, int dest_reg, Context& context) const;
+
 };
 
 class InitDeclarator : public Declarator {
@@ -47,6 +48,7 @@ public:
 
     void compile(std::ostream& os, int dest_reg, Context& context) const;
 
+    Declarator* declarator;
     NodeList* initialisers;
 
 };
@@ -57,7 +59,13 @@ public:
 
     ArrayDeclarator(std::string i);
 
+    ArrayDeclarator(std::string i, Node* s);
+
+    ~ArrayDeclarator();
+
     void compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const;
+
+    Node* array_size; // Expression representing array size.
 
 };
 

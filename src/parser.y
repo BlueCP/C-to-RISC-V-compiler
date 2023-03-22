@@ -391,7 +391,7 @@ declarator
 direct_declarator
   : IDENTIFIER { $$ = new BasicDeclarator(*$1); delete $1; }
   | '(' declarator ')' { $$ = $2; }
-  | direct_declarator '[' constant_expression ']' { $$ = new ArrayDeclarator($1->identifier); delete $1; }
+  | direct_declarator '[' constant_expression ']' { $$ = new ArrayDeclarator($1->identifier, $3); delete $1; }
   | direct_declarator '[' ']' { $$ = new ArrayDeclarator($1->identifier); delete $1; }
   | direct_declarator '(' parameter_type_list ')' { $$ = new FunctionDeclarator($1->identifier, $3); delete $1; }
   | direct_declarator '(' identifier_list ')' // Do not implement K&R-style function declarations.
