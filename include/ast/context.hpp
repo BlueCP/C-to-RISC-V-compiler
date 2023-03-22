@@ -105,6 +105,7 @@ public:
     bool return_flag = false; // Have we just reached a return statement, thus ending the compilation of statements prematurely?
     bool storing_var = false; // Are we storing an expression, rather than reading it into dest_reg?
     int array_offset_reg = 0; // Register containing array offset, zero by default (no offset).
+    bool array_indexing = false; // Whether or not we are currently indexing an array.
     std::string continue_label;
     std::string break_label;
     int switch_cascade_reg = 0;

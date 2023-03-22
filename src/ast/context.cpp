@@ -142,12 +142,31 @@ int Context::find_fp_offset(std::string identifier) {
 // Used for both initialising (with new_variable) and reassigning (with find_fp_offset).
 void Context::store_reg(std::ostream& os, int reg, int fp_offset) {
     // fp + fp_offset + array_offset_reg = address to target
-    os << "sw " << reg_name[reg] <<  ", " << fp_offset + array_offset_reg << "(fp)" << std::endl;
+    if (array_indexing) {
+        os << "slli " << reg_name[array_offset_reg] << ", " << reg_name[array_offset_reg] << ", 2" << std::endl;
+        // Convert array offset to byte addressing offset
+        os << "add " << reg_name[array_offset_reg] << ", " << reg_name[array_offset_reg] << ", fp" << std::endl;
+        // Add fp and array offset
+        os << "sw " << reg_name[reg] << ", " << fp_offset << "(" << reg_name[array_offset_reg] << ")" << std::endl;
+        // Store in final destination
+    } else {
+        os << "sw " << reg_name[reg] << ", " << fp_offset << "(fp)" << std::endl;
+    }
 }
 
 // Loads a register from the stack using the given fp offset.
 // Used together with find_fp_offset.
 void Context::load_reg(std::ostream& os, int reg, int fp_offset) {
     // fp + fp_offset + array_offset_reg = address to target
-    os << "lw " << reg_name[reg] << ", " << fp_offset + array_offset_reg << "(fp)" << std::endl;
+    if (array_indexing) {
+        os << "slli " << reg_name[array_offset_reg] << ", " << reg_name[array_offset_reg] << ", 2" << std::endl;
+        // TODO replace this multiplication by 4 by something else to make it compatible with other types.
+        // Convert array offset to byte addressing offset
+        os << "add " << reg_name[array_offset_reg] << ", " << reg_name[array_offset_reg] << ", fp" << std::endl;
+        // Add fp and array offset
+        os << "lw " << reg_name[reg] << ", " << fp_offset << "(" << reg_name[array_offset_reg] << ")" << std::endl;
+        // Store in final destination
+    } else {
+        os << "lw " << reg_name[reg] << ", " << fp_offset << "(fp)" << std::endl;
+    }
 }

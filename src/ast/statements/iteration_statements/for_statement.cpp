@@ -25,7 +25,7 @@ void ForStatement::compile(std::ostream& os, int dest_reg, Context& context) con
     initial_statement->compile(os, dest_reg, context);
     os << "." << l1 << ":" << std::endl;
     condition->compile(os, dest_reg, context);
-    os << "bne " << reg_name[dest_reg] << ", zero, ." << l2 << std::endl;
+    os << "beq " << reg_name[dest_reg] << ", zero, ." << l2 << std::endl;
 
     //body
     body->compile(os,dest_reg,context);
