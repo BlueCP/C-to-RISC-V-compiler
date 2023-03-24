@@ -14,6 +14,7 @@ void Declaration::compile(std::ostream& os, int dest_reg, Context& context) cons
     context.function_def = false;
     for (auto d : declarators) {
         d->size = type->size;
+        d->is_signed = type->is_signed;
         d->compile(os, dest_reg, context);
     }
 }

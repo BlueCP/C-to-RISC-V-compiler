@@ -52,10 +52,10 @@ extern "C" int fileno(FILE *stream);
 {L}({L}|{D})*           { yylval.string = new std::string(yytext); return(IDENTIFIER); // Return identifier instead of checkType for now.
 }
 
-0[xX]{H}+{IS}?          { return(CONSTANT); }
+0[xX]{H}+{IS}?          { yylval.number = strtod(yytext, 0); return(CONSTANT); }
 0{D}+{IS}?              { yylval.number = strtod(yytext, 0); return(CONSTANT); } // Neglect unsigned/long types for now.
 {D}+{IS}?               { yylval.number = strtod(yytext, 0); return(CONSTANT); }
-L?'(\\.|[^\\'])+'       { return(CONSTANT); }
+L?'(\\.|[^\\'])+'       { std::string s(yytext); yylval.number = s[1]; return(CONSTANT); } // Char
 
 {D}+{E}{FS}?            { return(CONSTANT); }
 {D}*"."{D}+({E})?{FS}?  { return(CONSTANT); }

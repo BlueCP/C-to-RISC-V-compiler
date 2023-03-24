@@ -20,11 +20,11 @@ void Identifier::compile(std::ostream& os, int dest_reg, Context& context) const
     } else {
         VarInfo* global_var = context.find_global_var(identifier);
         if (global_var == nullptr) { // If this is a local variable
-            int fp_offset = context.find_fp_offset(identifier);
+            VarInfo* var = context.find_local_var(identifier);
             if (context.storing_var) {
-                context.store_reg(os, dest_reg, fp_offset);
+                context.store_reg(os, dest_reg, var->fp_offset, var->size == 1);
             } else {
-                context.load_reg(os, dest_reg, fp_offset);
+                context.load_reg(os, dest_reg, var->fp_offset, var->size == 1);
             }
         } else { // If this is a global variable
             if (context.storing_var) {

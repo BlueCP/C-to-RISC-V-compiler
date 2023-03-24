@@ -31,4 +31,6 @@ public:
     int value = 0;
     // To make things easier, I have given all nodes an identifier and integer value.
 
+    bool is_signed = true; // Very bad but I'm out of time
+
 };

@@ -73,7 +73,7 @@ The following statements are invalid and are left only to keep track of what the
 %type <declarator> declarator direct_declarator init_declarator
 %type <declarator_list> init_declarator_list
 
-%type <type_spec> enum_specifier type_specifier declaration_specifiers
+%type <type_spec> enum_specifier type_specifier declaration_specifiers specifier_qualifier_list type_name
 
 %type <compound_statement> compound_statement
 
@@ -128,8 +128,8 @@ unary_expression
     }
     delete $1;
   }
-  | SIZEOF unary_expression
-  | SIZEOF '(' type_name ')'
+  | SIZEOF unary_expression { $$ = new SizeofExpr($2); }
+  | SIZEOF '(' type_name ')' { $$ = new SizeofExpr($3); }
   ;
 
 unary_operator
@@ -348,7 +348,7 @@ struct_declaration
 
 specifier_qualifier_list
   : type_specifier specifier_qualifier_list
-  | type_specifier
+  | type_specifier { $$ = $1; }
   | type_qualifier specifier_qualifier_list
   | type_qualifier
   ;
@@ -437,7 +437,7 @@ identifier_list
   ;
 
 type_name
-  : specifier_qualifier_list
+  : specifier_qualifier_list { $$ = $1; }
   | specifier_qualifier_list abstract_declarator
   ;
 

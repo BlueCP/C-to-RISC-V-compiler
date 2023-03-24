@@ -22,7 +22,7 @@ void BasicDeclarator::compile(std::ostream& os, __attribute__((__unused__)) int 
         os << identifier << ":" << std::endl;
         os << ".zero " << size << std::endl;
     } else {
-        context.new_variable(size, identifier);
+        context.new_variable(size, is_signed, identifier);
     }
 }
 
@@ -40,15 +40,27 @@ void InitDeclarator::compile(std::ostream& os, int dest_reg, Context& context) c
     // Therefore we have to update the size of the child here.
     if (context.in_global()) {
         os << identifier << ":" << std::endl;
-        for (unsigned i = 0; i < initialisers->node_list.size(); i++) {
-            os << ".word " << initialisers->node_list[i]->value << std::endl;
+        if (size == 1) { // If the type if char (byte)
+            if (initialisers->node_list.size() == 1) { // Single character
+                os << ".byte " << initialisers->node_list[0]->identifier << std::endl;
+            } else { // String
+                std::string word = "";
+                for (unsigned i = 0; i < initialisers->node_list.size(); i++) {
+                    word += initialisers->node_list[i]->identifier;
+                }
+                os << ".ascii \"" << word << "\"" << std::endl;
+            }
+        } else {
+            for (unsigned i = 0; i < initialisers->node_list.size(); i++) {
+                os << ".word " << initialisers->node_list[i]->value << std::endl;
+            }
         }
     } else {
         declarator->compile(os, dest_reg, context);
         int fp_offset = context.find_fp_offset(identifier); // Get fp offset
         for (unsigned i = 0; i < initialisers->node_list.size(); i++) {
             initialisers->node_list[i]->compile(os, dest_reg, context);
-            context.store_reg(os, dest_reg, fp_offset + (size * i));
+            context.store_reg(os, dest_reg, fp_offset + (size * i), size == 1);
         }
         // If the variable is not an array, this for loop will just execute once, giving the desired behaviour.
     }
@@ -75,7 +87,7 @@ void ArrayDeclarator::compile(std::ostream& os, __attribute__((__unused__)) int 
         os << identifier << ":" << std::endl;
         os << ".zero " << size * context.array_size << std::endl;
     } else {
-        context.new_variable(size * context.array_size, identifier);
+        context.new_variable(size * context.array_size, is_signed, identifier);
     }
 }
 
@@ -116,7 +128,8 @@ ParameterDeclaration::~ParameterDeclaration() {
 
 void ParameterDeclaration::compile(std::ostream& os, int dest_reg, Context& context) const {
     declarator->size = type->size;
+    declarator->is_signed = type->is_signed;
     declarator->compile(os, dest_reg, context);
     int fp_offset = context.find_fp_offset(declarator->identifier);
-    context.store_reg(os, dest_reg, fp_offset);
+    context.store_reg(os, dest_reg, fp_offset, type->size == 1);
 }

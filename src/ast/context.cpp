@@ -1,7 +1,7 @@
 #include "ast/context.hpp"
 
 
-VarInfo::VarInfo(int s, std::string i, int f)
+VarInfo::VarInfo(int s, bool is_signed, std::string i, int f)
     : size(s), identifier(i), fp_offset(f) {}
 
 
@@ -13,9 +13,9 @@ Scope::~Scope() {
     }
 }
 
-int Scope::new_variable(int size, std::string identifier, int frame_offset) {
+int Scope::new_variable(int size, bool is_signed, std::string identifier, int frame_offset) {
     scope_offset -= size;
-    variables.push_back(new VarInfo(size, identifier, scope_offset + frame_offset));
+    variables.push_back(new VarInfo(size, is_signed, identifier, scope_offset + frame_offset));
     return frame_offset + scope_offset;
 }
 
@@ -50,8 +50,8 @@ void Frame::leave_scope() {
     scope_stack.pop_back();
 }
 
-int Frame::new_variable(int size, std::string identifier) {
-    return scope_stack.back()->new_variable(size, identifier, frame_offset);
+int Frame::new_variable(int size, bool is_signed, std::string identifier) {
+    return scope_stack.back()->new_variable(size, is_signed, identifier, frame_offset);
     // If the total fp offset exceeds the stack frame size, the program will have undefined behaviour.
 }
 
@@ -72,6 +72,9 @@ Context::Context() {}
 Context::~Context() {
     for (auto s : frame_stack) {
         delete s;
+    }
+    for (auto v : global_variables) {
+        delete v;
     }
 }
 
@@ -122,8 +125,8 @@ void Context::leave_scope() {
     frame_stack.back()->leave_scope();
 }
 
-int Context::new_variable(int size, std::string identifier) {
-    return frame_stack.back()->new_variable(size, identifier);
+int Context::new_variable(int size, bool is_signed, std::string identifier) {
+    return frame_stack.back()->new_variable(size, is_signed, identifier);
 }
 
 bool Context::in_global() {
@@ -151,13 +154,8 @@ void Context::free_reg(int reg_id) {
     reg_available[reg_id] = true;
 }
 
-int Context::find_fp_offset(std::string identifier) {
-    VarInfo* var = frame_stack.back()->find_variable(identifier);
-    if (var == nullptr) {
-        return -1; // -1 is an invalid value as it is not a multiple of 4.
-    } else {
-        return var->fp_offset;
-    }
+VarInfo* Context::find_local_var(std::string identifier) {
+    return frame_stack.back()->find_variable(identifier);
 }
 
 VarInfo* Context::find_global_var(std::string identifier) {
@@ -167,6 +165,15 @@ VarInfo* Context::find_global_var(std::string identifier) {
         }
     }
     return nullptr;
+}
+
+int Context::find_fp_offset(std::string identifier) {
+    VarInfo* var = find_local_var(identifier);
+    if (var == nullptr) {
+        return -1; // -1 is an invalid value as it is not a multiple of 4.
+    } else {
+        return var->fp_offset;
+    }
 }
 
 // int Context::find_fp_offset(std::string identifier) {
@@ -189,31 +196,37 @@ VarInfo* Context::find_global_var(std::string identifier) {
 //     }
 // }
 
-void Context::store_reg(std::ostream& os, int reg, int fp_offset) {
+void Context::store_reg(std::ostream& os, int reg, int fp_offset, bool is_byte) {
     // fp + fp_offset + array_offset_reg = address to target
+    std::string instr = is_byte ? "sb " : "sw ";
     if (array_indexing) {
-        os << "slli " << reg_name[array_offset_reg] << ", " << reg_name[array_offset_reg] << ", 2" << std::endl;
+        if (!is_byte) {
+            os << "slli " << reg_name[array_offset_reg] << ", " << reg_name[array_offset_reg] << ", 2" << std::endl;
+        }
         // Convert array offset to byte addressing offset
         os << "add " << reg_name[array_offset_reg] << ", " << reg_name[array_offset_reg] << ", fp" << std::endl;
         // Add fp and array offset
-        os << "sw " << reg_name[reg] << ", " << fp_offset << "(" << reg_name[array_offset_reg] << ")" << std::endl;
+        os << instr << reg_name[reg] << ", " << fp_offset << "(" << reg_name[array_offset_reg] << ")" << std::endl;
         // Store in final destination
     } else {
-        os << "sw " << reg_name[reg] << ", " << fp_offset << "(fp)" << std::endl;
+        os << instr << reg_name[reg] << ", " << fp_offset << "(fp)" << std::endl;
     }
 }
 
-void Context::load_reg(std::ostream& os, int reg, int fp_offset) {
+void Context::load_reg(std::ostream& os, int reg, int fp_offset, bool is_byte) {
     // fp + fp_offset + array_offset_reg = address to target
+    std::string instr = is_byte ? "lbu " : "lw ";
     if (array_indexing) {
-        os << "slli " << reg_name[array_offset_reg] << ", " << reg_name[array_offset_reg] << ", 2" << std::endl;
+        if (!is_byte) {
+            os << "slli " << reg_name[array_offset_reg] << ", " << reg_name[array_offset_reg] << ", 2" << std::endl;
+        }
         // TODO replace this multiplication by 4 by something else to make it compatible with other types.
         // Convert array offset to byte addressing offset
         os << "add " << reg_name[array_offset_reg] << ", " << reg_name[array_offset_reg] << ", fp" << std::endl;
         // Add fp and array offset
-        os << "lw " << reg_name[reg] << ", " << fp_offset << "(" << reg_name[array_offset_reg] << ")" << std::endl;
+        os << instr << reg_name[reg] << ", " << fp_offset << "(" << reg_name[array_offset_reg] << ")" << std::endl;
         // Store in final destination
     } else {
-        os << "lw " << reg_name[reg] << ", " << fp_offset << "(fp)" << std::endl;
+        os << instr << reg_name[reg] << ", " << fp_offset << "(fp)" << std::endl;
     }
 }

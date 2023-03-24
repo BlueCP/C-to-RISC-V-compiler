@@ -12,10 +12,11 @@ class VarInfo {
 
 public:
 
-    VarInfo(int s, std::string i, int f);
+    VarInfo(int s, bool is, std::string i, int f);
 
     // std::string type;
     int size; // In bytes
+    bool is_signed;
     std::string identifier;
     int fp_offset; // Frame pointer offset (for global variables this is just set to 0)
 
@@ -30,7 +31,7 @@ public:
     ~Scope();
 
     // Add a new variable add return the scope offset.
-    int new_variable(int size, std::string identifier, int frame_offset);
+    int new_variable(int size, bool is_signed, std::string identifier, int frame_offset);
 
     // Find a variable with the given identifier.
     VarInfo* find_variable(std::string identifier);
@@ -55,7 +56,7 @@ public:
     void leave_scope();
 
     // Add a new variable to the stack frame and return the fp offset.
-    int new_variable(int size, std::string identifier);
+    int new_variable(int size, bool is_signed, std::string identifier);
 
     VarInfo* find_variable(std::string identifier);
 
@@ -91,7 +92,7 @@ public:
 
     // Prepares to create a new variable of given size in the current stack frame.
     // Returns the fp offset.
-    int new_variable(int size, std::string identifier);
+    int new_variable(int size, bool is_signed, std::string identifier);
 
     bool in_global();
 
@@ -106,20 +107,23 @@ public:
     // Marks a given register as available.
     void free_reg(int reg_id);
 
-    // Returns the fp offset of a variable relative to the current fp.
-    int find_fp_offset(std::string identifier);
+    // Finds information about a local variable.
+    VarInfo* find_local_var(std::string identifier);
 
     // Returns variable information if a global variable with the given identifer exists.
     // Otherwise, returns nullptr.
     VarInfo* find_global_var(std::string identifier);
 
+    // Returns the fp offset of a variable relative to the current fp.
+    int find_fp_offset(std::string identifier);
+
     // Stores a register in the stack using the given fp offset.
     // Used for both initialising (with new_variable) and reassigning (with find_fp_offset).
-    void store_reg(std::ostream& os, int reg, int fp_offset);
+    void store_reg(std::ostream& os, int reg, int fp_offset, bool is_byte);
 
     // Loads a register from the stack using the given fp offset.
     // Used together with find_fp_offset.
-    void load_reg(std::ostream& os, int reg, int fp_offset);
+    void load_reg(std::ostream& os, int reg, int fp_offset, bool is_byte);
 
     std::vector<VarInfo*> global_variables; // A list of global variables.
 

@@ -33,6 +33,7 @@
 #include "ast/expressions/unary_expr/post_inc_expr.hpp"
 #include "ast/expressions/unary_expr/pre_dec_expr.hpp"
 #include "ast/expressions/unary_expr/pre_inc_expr.hpp"
+#include "ast/expressions/unary_expr/sizeof_expr.hpp"
 #include "ast/expressions/unary_expr/unary_op.hpp"
 
 #include "ast/expressions/array_index.hpp"
