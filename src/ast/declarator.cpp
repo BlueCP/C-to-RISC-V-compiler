@@ -19,7 +19,6 @@ BasicDeclarator::~BasicDeclarator() {} // Nothing to delete.
 // BasicDeclarator declares a single variable.
 void BasicDeclarator::compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
     if (context.in_global()) {
-        // TODO codegen declare a new global variable
         os << identifier << ":" << std::endl;
         os << ".zero " << size << std::endl;
     } else {
@@ -39,14 +38,13 @@ void InitDeclarator::compile(std::ostream& os, int dest_reg, Context& context) c
     context.array_size = initialisers->node_list.size();
     declarator->size = size; // Declaration modifies size of InitDeclarator;
     // Therefore we have to update the size of the child here.
-    declarator->compile(os, dest_reg, context);
     if (context.in_global()) {
+        os << identifier << ":" << std::endl;
         for (unsigned i = 0; i < initialisers->node_list.size(); i++) {
-            // TODO codegen
-            // Instance of Constant has identifier equal to the number it represents.
-            initialisers->node_list[i]->compile(os, dest_reg, context);
+            os << ".word " << initialisers->node_list[i]->value << std::endl;
         }
     } else {
+        declarator->compile(os, dest_reg, context);
         int fp_offset = context.find_fp_offset(identifier); // Get fp offset
         for (unsigned i = 0; i < initialisers->node_list.size(); i++) {
             initialisers->node_list[i]->compile(os, dest_reg, context);
@@ -68,18 +66,15 @@ ArrayDeclarator::~ArrayDeclarator() {
 }
 
 void ArrayDeclarator::compile(std::ostream& os, __attribute__((__unused__)) int dest_reg, Context& context) const {
+    if (array_size != nullptr) { // If an array size was defined, evaluate that.
+        context.array_size = array_size->value;
+    } else if (context.array_size == 0) {
+        std::cout << "Array size not defined anywhere!" << std::endl;
+    }
     if (context.in_global()) {
-        // TODO codegen declare a new global array
-        auto l1 = new_label(identifier);
-        os << l1 << ":" << std::endl;
-        os << ".zero " << size << std::endl;
-
+        os << identifier << ":" << std::endl;
+        os << ".zero " << size * context.array_size << std::endl;
     } else {
-        if (array_size != nullptr) { // If an array size was defined, evaluate that.
-            context.array_size = array_size->value;
-        } else if (context.array_size == 0) {
-            std::cout << "Array size not defined anywhere!" << std::endl;
-        }
         context.new_variable(size * context.array_size, identifier);
     }
 }

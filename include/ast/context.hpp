@@ -17,7 +17,7 @@ public:
     // std::string type;
     int size; // In bytes
     std::string identifier;
-    int fp_offset; // Frame pointer offset
+    int fp_offset; // Frame pointer offset (for global variables this is just set to 0)
 
 };
 
@@ -109,6 +109,10 @@ public:
     // Returns the fp offset of a variable relative to the current fp.
     int find_fp_offset(std::string identifier);
 
+    // Returns variable information if a global variable with the given identifer exists.
+    // Otherwise, returns nullptr.
+    VarInfo* find_global_var(std::string identifier);
+
     // Stores a register in the stack using the given fp offset.
     // Used for both initialising (with new_variable) and reassigning (with find_fp_offset).
     void store_reg(std::ostream& os, int reg, int fp_offset);
@@ -116,6 +120,8 @@ public:
     // Loads a register from the stack using the given fp offset.
     // Used together with find_fp_offset.
     void load_reg(std::ostream& os, int reg, int fp_offset);
+
+    std::vector<VarInfo*> global_variables; // A list of global variables.
 
     std::map<std::string, int> enum_map;
     // A mapping between the names of enum elements and their values.

@@ -160,6 +160,15 @@ int Context::find_fp_offset(std::string identifier) {
     }
 }
 
+VarInfo* Context::find_global_var(std::string identifier) {
+    for (auto v : global_variables) {
+        if (v->identifier == identifier) {
+            return v;
+        }
+    }
+    return nullptr;
+}
+
 // int Context::find_fp_offset(std::string identifier) {
 //     VarInfo* var = nullptr;
 //     int depth = 0;
