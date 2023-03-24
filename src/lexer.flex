@@ -11,6 +11,8 @@ IS (u|U|l|L)*
 // Avoid error "error: `fileno' was not declared in this scope"
 extern "C" int fileno(FILE *stream);
 
+// This lexer is based on https://www.lysator.liu.se/c/ANSI-C-grammar-y.html.
+
 #include "parser.tab.hpp"
 %}
 

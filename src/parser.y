@@ -1,6 +1,8 @@
 %code requires{
   #include "ast.hpp"
 
+  // This parser is based on https://www.lysator.liu.se/c/ANSI-C-grammar-y.html.
+
   #include <cassert>
 
   extern Node *g_root; // A way of getting the AST out
